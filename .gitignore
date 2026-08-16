@@ -1,0 +1,42 @@
+# =========================
+# Secrets / Environment
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Python
+# =========================
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# =========================
+# Frontend
+# =========================
+node_modules/
+frontend/dist/
+
+# =========================
+# IDE
+# =========================
+.vscode/
+
+# =========================
+# YOLO / ML generated files
+# =========================
+runs/
+*.pt
+*.onnx
+*.engine
+*_openvino_model/
+
+# =========================
+# Generated datasets / caches
+# =========================
+*.cache
+
+*.torchscript
