@@ -1,6 +1,6 @@
 # EarthRelay
 
-AI environmental case intelligence for **detection, investigation, and response**.
+Environmental case intelligence for **detection, investigation, and response**.
 
 A citizen files a field photo. EarthRelay detects what is in the image, builds a full case report (severity, weather, location, AI write-up), **auto-forwards** it to the right desk, and lets an NGO **take the case, call, and dispatch**.
 

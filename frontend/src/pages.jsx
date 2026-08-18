@@ -10,10 +10,9 @@ export function Landing() {
   return (
     <div className="page-screen">
       <p className="kicker">EarthRelay</p>
-      <h1>AI environmental case intelligence</h1>
+      <h1>Environmental case intelligence</h1>
       <p className="page-lead">
         Detect, investigate, and dispatch help from a field photo — for citizens and response teams.
-        Use this official EarthRelay only. Filings here go to the NGO inbox.
       </p>
       <Link className="ghost-btn page-cta" to="/role">
         Get started
