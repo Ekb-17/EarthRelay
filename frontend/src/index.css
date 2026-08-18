@@ -1,24 +1,27 @@
 :root {
-  color-scheme: dark;
-  --bg: #1c2230;
-  --panel: #262d3d;
-  --panel-2: #2e3648;
-  --line: #4a5366;
-  --text: #f4f0e8;
-  --muted: #b7b0a4;
-  --earthquake: #c4a574;
-  --tsunami: #7eb8c9;
-  --flood: #6b8cbe;
-  --wildlife: #8faf88;
-  --protected: #9caf88;
-  --satellite: #c4896a;
-  --weather: #8aa4b8;
-  --case: #c4a574;
-  --accent: #c9a86c;
-  --accent-dim: rgba(201, 168, 108, 0.16);
+  color-scheme: light;
+  --bg: #f3eee4;
+  --panel: #fbf8f2;
+  --panel-2: #f0e9dc;
+  --line: #d4c4a8;
+  --text: #1c1917;
+  --muted: #6b6258;
+  --header: #1f4d3a;
+  --header-text: #f7f1e6;
+  --gold: #b08d57;
+  --earthquake: #b45309;
+  --tsunami: #0e7490;
+  --flood: #1d4ed8;
+  --wildlife: #3f6212;
+  --protected: #1f4d3a;
+  --satellite: #c2410c;
+  --weather: #0369a1;
+  --case: #6d28d9;
+  --accent: #1f4d3a;
+  --accent-dim: rgba(31, 77, 58, 0.1);
   --glow: none;
-  --sans: "Segoe UI", Calibri, system-ui, sans-serif;
-  --serif: Georgia, "Palatino Linotype", Palatino, serif;
+  --sans: "Segoe UI", system-ui, sans-serif;
+  --serif: Georgia, "Times New Roman", serif;
 }
 
 * {
@@ -36,6 +39,8 @@ body,
 
 body {
   font-family: var(--sans);
-  background: var(--bg);
+  background:
+    radial-gradient(900px 420px at 50% -8%, rgba(176, 141, 87, 0.14), transparent 55%),
+    var(--bg);
   color: var(--text);
 }
