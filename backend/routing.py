@@ -31,7 +31,7 @@ TEAMS = {
     },
 }
 
-# Citizen incident type → desk. Fire + earthquake share the fire team.
+# Citizen incident type → inbox desk. The on-screen team name is more specific.
 ROUTE_MAP = {
     "wildfire_smoke": "fire-team",
     "grass_fire": "fire-team",
@@ -61,6 +61,35 @@ ROUTE_MAP = {
     "injured_wildlife": "wildlife-unit",
 }
 
+RESPONSE_TEAMS = {
+    "illegal_dumping": "dumping response team",
+    "plastic_waste": "plastic waste removal team",
+    "overflowing_garbage": "waste collection team",
+    "construction_debris": "debris removal team",
+    "e_waste": "e-waste recovery team",
+    "tires_dumped": "tire waste removal team",
+    "oil_spill": "oil spill response team",
+    "sewage_discharge": "sanitation response team",
+    "water_pollution": "water pollution response team",
+    "wildfire_smoke": "fire response team",
+    "grass_fire": "fire response team",
+    "factory_smoke": "smoke response team",
+    "burning_trash": "fire response team",
+    "flood_damage": "flood response team",
+    "river_overflow": "flood response team",
+    "urban_flooding": "flood response team",
+    "erosion": "erosion response team",
+    "deforestation": "forest protection team",
+    "illegal_logging": "forest protection team",
+    "habitat_destruction": "habitat recovery team",
+    "wildlife": "wildlife response team",
+    "injured_wildlife": "wildlife rescue team",
+    "air_pollution": "air quality response team",
+    "chemical_spill": "hazardous materials team",
+    "earthquake": "earthquake response team",
+    "other": "organization",
+}
+
 LEGACY_TEAMS = {
     "unassigned": "earthrelay-org",
     "field-alpha": "earthrelay-org",
@@ -79,12 +108,17 @@ def normalize_team(team: str | None) -> str:
     return LEGACY_TEAMS.get(team or "", "earthrelay-org")
 
 
+def response_team(incident_type: str | None) -> str:
+    return RESPONSE_TEAMS.get(incident_type or "other", RESPONSE_TEAMS["other"])
+
+
 def route_for(incident_type: str | None) -> dict:
     team_id = ROUTE_MAP.get(incident_type or "other", "earthrelay-org")
     team = TEAMS[team_id]
+    label = response_team(incident_type)
     return {
         "id": team["id"],
-        "label": team["label"],
+        "label": label,
         "short": team["short"],
         "blurb": team["blurb"],
     }
@@ -95,7 +129,7 @@ def enrich_case(case: dict) -> dict:
     team_id = normalize_team(case.get("routed_to") or case.get("assigned_team") or routed["id"])
     team = TEAMS.get(team_id) or TEAMS["earthrelay-org"]
     case["routed_to"] = team["id"]
-    case["routed_label"] = team["label"]
+    case["routed_label"] = response_team(case.get("incident_type"))
     case["assigned_team"] = team["id"]
     case.setdefault("phone_notice", PHONE_NOTICE)
     case.setdefault("claimed_by", "")

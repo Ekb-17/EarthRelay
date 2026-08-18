@@ -53,6 +53,35 @@ const ROUTE_MAP = {
   injured_wildlife: 'wildlife-unit',
 }
 
+const RESPONSE_TEAMS = {
+  illegal_dumping: 'dumping response team',
+  plastic_waste: 'plastic waste removal team',
+  overflowing_garbage: 'waste collection team',
+  construction_debris: 'debris removal team',
+  e_waste: 'e-waste recovery team',
+  tires_dumped: 'tire waste removal team',
+  oil_spill: 'oil spill response team',
+  sewage_discharge: 'sanitation response team',
+  water_pollution: 'water pollution response team',
+  wildfire_smoke: 'fire response team',
+  grass_fire: 'fire response team',
+  factory_smoke: 'smoke response team',
+  burning_trash: 'fire response team',
+  flood_damage: 'flood response team',
+  river_overflow: 'flood response team',
+  urban_flooding: 'flood response team',
+  erosion: 'erosion response team',
+  deforestation: 'forest protection team',
+  illegal_logging: 'forest protection team',
+  habitat_destruction: 'habitat recovery team',
+  wildlife: 'wildlife response team',
+  injured_wildlife: 'wildlife rescue team',
+  air_pollution: 'air quality response team',
+  chemical_spill: 'hazardous materials team',
+  earthquake: 'earthquake response team',
+  other: 'organization',
+}
+
 export const STATUS_LABELS = {
   pending: 'New',
   under_investigation: 'Investigating',
@@ -69,16 +98,10 @@ export function teamLabel(id) {
   return TEAMS.find((team) => team.id === id)?.label || id || 'EarthRelay organization'
 }
 
+export function responseTeam(incidentType) {
+  return RESPONSE_TEAMS[incidentType] || RESPONSE_TEAMS.other
+}
+
 export function forwardSentence(incidentType) {
-  const team = routeFor(incidentType)
-  if (team.id === 'fire-team') {
-    return 'This case will be forwarded to the fire response team.'
-  }
-  if (team.id === 'water-unit') {
-    return 'This case will be forwarded to the water unit.'
-  }
-  if (team.id === 'wildlife-unit') {
-    return 'This case will be forwarded to the wildlife unit.'
-  }
-  return 'This case will be forwarded to the organization.'
+  return `This case will be forwarded to the ${responseTeam(incidentType)}.`
 }

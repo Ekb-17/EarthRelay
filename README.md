@@ -14,11 +14,7 @@ Environmental incidents (dumping, fire, flooding, injured wildlife) are reported
 
 1. **Citizen** uploads a site photo, pins GPS, and can add a phone number.
 2. **CPU object detection** (YOLO) plus an investigation write-up (severity, causes, actions, weather).
-3. **Auto-route** to a desk:
-   - Fire, smoke, burning trash, earthquake → **Fire team**
-   - Dumping / garbage / debris → **EarthRelay organization**
-   - Flood / sewage / water → **Water unit**
-   - Wildlife → **Wildlife unit**
+3. **Auto-route** names a response team for every incident type (fire, earthquake, flood, plastic waste, habitat recovery, and the rest). Cases still land in one of four NGO inboxes: fire, organization, water, or wildlife.
 4. **NGO inbox** receives the full packet: original + annotated photos, title, notes, incident type, GPS + street address, phone, severity/priority, AI write-up, weather, map pin.
 5. Officers **take the case**, set status (investigating / cleanup / resolved), and **call or dispatch** using phone + GPS.
 

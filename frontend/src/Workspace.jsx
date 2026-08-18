@@ -18,7 +18,7 @@ import HazardMap from './HazardMap.jsx'
 import LocationPrompt from './LocationPrompt.jsx'
 import PlaceSearch from './PlaceSearch.jsx'
 import { INCIDENT_TYPES, useEarthRelay } from './context.jsx'
-import { PHONE_NOTICE, STATUS_LABELS, TEAMS, forwardSentence, routeFor } from './routing.js'
+import { PHONE_NOTICE, STATUS_LABELS, TEAMS, forwardSentence, responseTeam } from './routing.js'
 
 const LAYER_ICONS = {
   satellite: Satellite,
@@ -244,7 +244,7 @@ export default function Workspace() {
                 </span>
                 <strong>{item.title}</strong>
                 <small>
-                  {item.routed_label || routeFor(item.incident_type).label}
+                  {item.routed_label || responseTeam(item.incident_type)}
                   {item.claimed_by ? ` · taken by ${item.claimed_by}` : ' · unclaimed'}
                 </small>
                 <small>
