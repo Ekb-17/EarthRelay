@@ -1,16 +1,35 @@
-# React + Vite
+# EarthRelay frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React UI for filing cases, the hazard map, GPS, and the NGO inbox.
 
-Currently, two official plugins are available:
+## Run
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+Vite listens on port **5173** and proxies `/api` and `/uploads` to the backend on port **8000**.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Production build (also used by the Docker image):
 
-## Expanding the ESLint configuration
+```bash
+npm run build
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Layout
+
+| File | Role |
+|---|---|
+| `src/App.jsx` | Routes |
+| `src/pages.jsx` | Landing, role pick, case details, contact |
+| `src/Workspace.jsx` | File-a-report (citizen) and NGO inbox |
+| `src/CaseReport.jsx` | Full case packet + take / call / dispatch |
+| `src/HazardMap.jsx` | Mapbox GL map + layers |
+| `src/LocationPrompt.jsx` | Location on / off / not-working prompt |
+| `src/routing.js` | Client copy of auto-forward rules |
+| `src/gps.js` | Geolocation status helpers |
+
+## Map
+
+Without `VITE_MAPBOX_TOKEN`, streets come from OpenFreeMap. Set the token in the **repo-root** `.env` (Vite `envDir` is the parent folder).
