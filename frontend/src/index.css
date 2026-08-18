@@ -1,23 +1,24 @@
 :root {
   color-scheme: dark;
-  --bg: #1a2740;
-  --panel: #243552;
-  --panel-2: #2c3e5c;
-  --line: #4a6288;
-  --text: #f3f7fc;
-  --muted: #b7c6db;
-  --earthquake: #f59e0b;
-  --tsunami: #22d3ee;
-  --flood: #60a5fa;
-  --wildlife: #86efac;
-  --protected: #2dd4bf;
-  --satellite: #fb923c;
-  --weather: #38bdf8;
-  --case: #c4b5fd;
-  --accent: #5eead4;
-  --accent-dim: rgba(94, 234, 212, 0.18);
-  --glow: 0 0 24px rgba(94, 234, 212, 0.2);
-  --sans: "Segoe UI", system-ui, sans-serif;
+  --bg: #1c2230;
+  --panel: #262d3d;
+  --panel-2: #2e3648;
+  --line: #4a5366;
+  --text: #f4f0e8;
+  --muted: #b7b0a4;
+  --earthquake: #c4a574;
+  --tsunami: #7eb8c9;
+  --flood: #6b8cbe;
+  --wildlife: #8faf88;
+  --protected: #9caf88;
+  --satellite: #c4896a;
+  --weather: #8aa4b8;
+  --case: #c4a574;
+  --accent: #c9a86c;
+  --accent-dim: rgba(201, 168, 108, 0.16);
+  --glow: none;
+  --sans: "Segoe UI", Calibri, system-ui, sans-serif;
+  --serif: Georgia, "Palatino Linotype", Palatino, serif;
 }
 
 * {
@@ -35,9 +36,6 @@ body,
 
 body {
   font-family: var(--sans);
-  background:
-    radial-gradient(1100px 520px at 50% -8%, rgba(125, 211, 252, 0.28), transparent 55%),
-    radial-gradient(700px 420px at 100% 100%, rgba(94, 234, 212, 0.12), transparent 50%),
-    var(--bg);
+  background: var(--bg);
   color: var(--text);
 }
