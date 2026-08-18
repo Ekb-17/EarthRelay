@@ -16,7 +16,7 @@ export function Landing() {
         Use this official EarthRelay only. Filings here go to the NGO inbox.
       </p>
       <Link className="ghost-btn page-cta" to="/role">
-        Enter EarthRelay
+        Get started
       </Link>
     </div>
   )

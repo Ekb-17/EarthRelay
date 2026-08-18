@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { GpsStatus } from './LocationPrompt.jsx'
-import { PHONE_NOTICE, STATUS_LABELS, TEAMS, routeFor } from './routing.js'
+import { PHONE_NOTICE, STATUS_LABELS, TEAMS, forwardSentence } from './routing.js'
 
 function List({ title, items }) {
   if (!items || !items.length) return null
@@ -107,7 +107,7 @@ export default function CaseReport({ caseFile, role, onStatus, onAssign, onClaim
   const ecosystem = report.ecosystem || {}
   const confidence = report.confidence || {}
   const isNgo = role === 'ngo'
-  const dest = caseFile.routed_label || routeFor(caseFile.incident_type).label
+  const forwarded = forwardSentence(caseFile.incident_type)
   const coords =
     caseFile.lat != null && caseFile.lng != null
       ? `${Number(caseFile.lat).toFixed(5)}, ${Number(caseFile.lng).toFixed(5)}`
@@ -122,8 +122,8 @@ export default function CaseReport({ caseFile, role, onStatus, onAssign, onClaim
         </p>
         <h3>{caseFile.title}</h3>
         <p className="forward-banner">
-          Forwarded to {dest}
-          {caseFile.claimed_by ? ` · taken by ${caseFile.claimed_by}` : ' · waiting in inbox'}
+          {forwarded}
+          {caseFile.claimed_by ? ` Taken by ${caseFile.claimed_by}.` : ' Waiting in the inbox.'}
         </p>
         {report.duplicate_note && <p className="dup-banner">{report.duplicate_note}</p>}
         {report.emergency && <p className="alert-banner">HIGH priority — highlighted for response</p>}
@@ -287,7 +287,7 @@ export default function CaseReport({ caseFile, role, onStatus, onAssign, onClaim
         </>
       ) : (
         <p className="pin-note">
-          This filing was forwarded to {dest}. Officers take it from the NGO inbox. ({phoneNotice})
+          {forwarded} Officers take it from the NGO inbox. ({phoneNotice})
         </p>
       )}
     </section>

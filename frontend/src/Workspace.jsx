@@ -18,7 +18,7 @@ import HazardMap from './HazardMap.jsx'
 import LocationPrompt from './LocationPrompt.jsx'
 import PlaceSearch from './PlaceSearch.jsx'
 import { INCIDENT_TYPES, useEarthRelay } from './context.jsx'
-import { PHONE_NOTICE, STATUS_LABELS, TEAMS, routeFor } from './routing.js'
+import { PHONE_NOTICE, STATUS_LABELS, TEAMS, forwardSentence, routeFor } from './routing.js'
 
 const LAYER_ICONS = {
   satellite: Satellite,
@@ -56,7 +56,6 @@ export default function Workspace() {
   const er = useEarthRelay()
   const isNgo = er.role === 'ngo'
   const [inboxTeam, setInboxTeam] = useState('all')
-  const dest = routeFor(er.incidentType)
   const inboxCases = er.cases.filter((item) => {
     if (inboxTeam === 'all') return true
     if (inboxTeam === 'unclaimed') return !item.claimed_by
@@ -147,9 +146,7 @@ export default function Workspace() {
                 ? `Pinned ${er.pin.lat.toFixed(3)}, ${er.pin.lng.toFixed(3)}`
                 : 'Pin the map or use GPS, then submit.'}
             </p>
-            <p className="forward-note">
-              EarthRelay will forward this whole case to <strong>{dest.label}</strong>.
-            </p>
+            <p className="forward-note">{forwardSentence(er.incidentType)}</p>
             <p className="pin-note">({PHONE_NOTICE})</p>
             {er.error && (
               <p className="banner">

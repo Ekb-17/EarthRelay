@@ -68,3 +68,17 @@ export function routeFor(incidentType) {
 export function teamLabel(id) {
   return TEAMS.find((team) => team.id === id)?.label || id || 'EarthRelay organization'
 }
+
+export function forwardSentence(incidentType) {
+  const team = routeFor(incidentType)
+  if (team.id === 'fire-team') {
+    return 'This case will be forwarded to the fire response team.'
+  }
+  if (team.id === 'water-unit') {
+    return 'This case will be forwarded to the water unit.'
+  }
+  if (team.id === 'wildlife-unit') {
+    return 'This case will be forwarded to the wildlife unit.'
+  }
+  return 'This case will be forwarded to the organization.'
+}
