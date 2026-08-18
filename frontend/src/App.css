@@ -13,7 +13,7 @@
   justify-content: space-between;
   padding: 0 20px;
   border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--panel) 88%, #020617);
+  background: color-mix(in srgb, var(--panel) 82%, #1e3a5f);
 }
 
 .kicker {
@@ -98,7 +98,7 @@ a.ghost-btn {
 
 .loc-modal {
   width: min(400px, 100%);
-  background: color-mix(in srgb, var(--panel) 92%, #020617);
+  background: color-mix(in srgb, var(--panel) 90%, #1e3a5f);
   border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
   border-radius: 16px;
   padding: 20px 18px 16px;
@@ -687,7 +687,7 @@ a.ghost-btn {
   background:
     radial-gradient(ellipse 80% 50% at 50% -10%, rgba(56, 189, 248, 0.22), transparent 58%),
     radial-gradient(ellipse 50% 40% at 80% 110%, rgba(94, 234, 212, 0.1), transparent 55%),
-    linear-gradient(180deg, #07101c 0%, var(--bg) 100%);
+    linear-gradient(180deg, #2a4570 0%, var(--bg) 72%);
 }
 
 .page-screen h1,
