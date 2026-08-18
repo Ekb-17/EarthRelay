@@ -71,6 +71,9 @@ export function EarthRelayProvider({ children }) {
   const [notes, setNotes] = useState('')
   const [incidentType, setIncidentType] = useState('plastic_waste')
   const [role, setRole] = useState(() => sessionStorage.getItem('er-role') || 'citizen')
+  const [firstName, setFirstName] = useState(() => sessionStorage.getItem('er-first') || '')
+  const [lastName, setLastName] = useState(() => sessionStorage.getItem('er-last') || '')
+  const [phone, setPhone] = useState(() => sessionStorage.getItem('er-phone') || '')
   const [reporterName, setReporterName] = useState(() => sessionStorage.getItem('er-desk') || '')
   const [layers, setLayers] = useState({
     satellite: false,
@@ -87,6 +90,27 @@ export function EarthRelayProvider({ children }) {
   function chooseRole(next) {
     setRole(next)
     sessionStorage.setItem('er-role', next)
+  }
+
+  function setIdentity({ first, last, phone: nextPhone, role: nextRole }) {
+    if (first != null) {
+      setFirstName(first)
+      sessionStorage.setItem('er-first', first)
+    }
+    if (last != null) {
+      setLastName(last)
+      sessionStorage.setItem('er-last', last)
+    }
+    if (nextPhone != null) {
+      setPhone(nextPhone)
+      sessionStorage.setItem('er-phone', nextPhone)
+    }
+    if (nextRole) chooseRole(nextRole)
+    const full = `${first ?? firstName} ${last ?? lastName}`.trim()
+    if (full) {
+      setReporterName(full)
+      sessionStorage.setItem('er-desk', full)
+    }
   }
 
   async function load() {
@@ -150,11 +174,15 @@ export function EarthRelayProvider({ children }) {
     }
   }
 
-  async function handleUpload() {
+  async function handleUpload(extra = {}) {
     if (!file) {
       setError('Choose an image to open a case.')
       return null
     }
+    const nextRole = extra.role || role
+    const nextFirst = extra.firstName ?? firstName
+    const nextLast = extra.lastName ?? lastName
+    const nextPhone = extra.phone ?? phone
     setUploading(true)
     setError('')
     try {
@@ -166,9 +194,14 @@ export function EarthRelayProvider({ children }) {
       if (pin) {
         body.append('lat', String(pin.lat))
         body.append('lng', String(pin.lng))
+        body.append('location_source', extra.locationSource || 'gps')
       }
-      body.append('reporter_role', role)
-      body.append('reporter_name', reporterName)
+      body.append('reporter_role', nextRole)
+      const fullName = `${nextFirst} ${nextLast}`.trim() || reporterName
+      body.append('reporter_name', fullName)
+      body.append('first_name', nextFirst)
+      body.append('last_name', nextLast)
+      if (nextPhone) body.append('phone', nextPhone)
       const created = await createCase(body)
       setFile(null)
       setTitle('')
@@ -253,6 +286,10 @@ export function EarthRelayProvider({ children }) {
       setIncidentType,
       role,
       chooseRole,
+      firstName,
+      lastName,
+      phone,
+      setIdentity,
       reporterName,
       setReporterName,
       layers,
@@ -281,6 +318,9 @@ export function EarthRelayProvider({ children }) {
       notes,
       incidentType,
       role,
+      firstName,
+      lastName,
+      phone,
       reporterName,
       layers,
       selectedCase,

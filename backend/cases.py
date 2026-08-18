@@ -168,7 +168,11 @@ def create_case(
     detection: dict,
     reporter_role: str = "citizen",
     reporter_name: str = "",
+    phone: str = "",
+    first_name: str = "",
+    last_name: str = "",
     address: str = "",
+    location_source: str = "",
 ) -> dict:
     case_id = str(uuid.uuid4())[:8]
     incident = incident_type if incident_type in INCIDENT_TYPES else "other"
@@ -187,8 +191,10 @@ def create_case(
         "routed_to": routed["id"],
         "routed_label": routed["label"],
         "reporter_role": role,
-        "reporter_name": reporter_name,
-        "phone": "",
+        "reporter_name": reporter_name or f"{first_name} {last_name}".strip(),
+        "first_name": first_name,
+        "last_name": last_name,
+        "phone": (phone or "").strip(),
         "phone_notice": PHONE_NOTICE,
         "notes": notes or "",
         "lat": lat,
@@ -196,7 +202,7 @@ def create_case(
         "address": location_text,
         "claimed_by": "",
         "claimed_at": None,
-        "location_source": "map_pin" if lat is not None else "",
+        "location_source": location_source or ("gps" if lat is not None else ""),
         "location_accuracy_m": None,
         "created_at": utc_now(),
         "updated_at": utc_now(),

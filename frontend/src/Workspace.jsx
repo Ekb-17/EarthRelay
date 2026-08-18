@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import {
   Activity,
   AlertTriangle,
@@ -56,6 +56,7 @@ export default function Workspace() {
   const er = useEarthRelay()
   const isNgo = er.role === 'ngo'
   const [inboxTeam, setInboxTeam] = useState('all')
+  if (!isNgo) return <Navigate to="/who" replace />
   const inboxCases = er.cases.filter((item) => {
     if (inboxTeam === 'all') return true
     if (inboxTeam === 'unclaimed') return !item.claimed_by

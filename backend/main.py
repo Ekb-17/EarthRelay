@@ -191,6 +191,10 @@ async def open_case(
     lng: str = Form(""),
     reporter_role: str = Form("citizen"),
     reporter_name: str = Form(""),
+    phone: str = Form(""),
+    first_name: str = Form(""),
+    last_name: str = Form(""),
+    location_source: str = Form(""),
 ):
     if incident_type not in INCIDENT_TYPES:
         incident_type = "other"
@@ -214,8 +218,12 @@ async def open_case(
         original_name=image.filename or "upload.jpg",
         detection={"status": "pending"},
         reporter_role=reporter_role,
-        reporter_name=reporter_name,
+        reporter_name=reporter_name or f"{first_name} {last_name}".strip(),
         address=address,
+        phone=phone,
+        first_name=first_name,
+        last_name=last_name,
+        location_source=location_source,
     )
     case_id = target["id"]
     stamp = str(len(target.get("reports") or []))

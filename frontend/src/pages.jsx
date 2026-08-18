@@ -1,55 +1,34 @@
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useEffect } from 'react'
-import { Shield, User } from 'lucide-react'
 import CaseReport, { HelpDispatch } from './CaseReport.jsx'
 import HazardMap from './HazardMap.jsx'
 import LocationPrompt, { useGpsGate } from './LocationPrompt.jsx'
 import { isElevated, useEarthRelay } from './context.jsx'
 
 export function Landing() {
+  const er = useEarthRelay()
   return (
-    <div className="page-screen">
-      <p className="kicker">EarthRelay</p>
-      <h1>Environmental case intelligence</h1>
-      <p className="page-lead">
-        Detect, investigate, and dispatch help from a field photo — for citizens and response teams.
-      </p>
-      <Link className="ghost-btn page-cta" to="/role">
-        Get started
-      </Link>
-    </div>
-  )
-}
-
-export function RolePick() {
-  const { chooseRole } = useEarthRelay()
-  const navigate = useNavigate()
-
-  function pick(role) {
-    chooseRole(role)
-    navigate('/app')
-  }
-
-  return (
-    <div className="page-screen">
-      <p className="kicker">Choose how you enter</p>
-      <h1>Who are you?</h1>
-      <p className="page-lead">Tap one. You can switch later from the report screen.</p>
-      <div className="role-grid">
-        <button type="button" className="role-card" onClick={() => pick('citizen')}>
-          <User size={28} />
-          <strong>Citizen</strong>
-          <small>File a photo. EarthRelay forwards the whole case to the right desk.</small>
-        </button>
-        <button type="button" className="role-card" onClick={() => pick('ngo')}>
-          <Shield size={28} />
-          <strong>NGO / admin</strong>
-          <small>Open the inbox, take a case, call or dispatch</small>
-        </button>
+    <div className="landing-hero">
+      <div className="landing-map">
+        <HazardMap
+          geojson={er.payload?.geojson}
+          satellite={er.payload?.satellite}
+          layers={er.layers}
+          selectedId={null}
+          onSelect={() => {}}
+          onInspect={() => {}}
+        />
       </div>
-      <Link className="pin-note" to="/">
-        Back
-      </Link>
+      <div className="landing-card">
+        <p className="kicker">EarthRelay</p>
+        <h1>Environmental case intelligence</h1>
+        <p className="page-lead">
+          Detect, investigate, and dispatch help from a field photo — for citizens and response teams.
+        </p>
+        <Link className="ghost-btn page-cta" to="/who">
+          Get started
+        </Link>
+      </div>
     </div>
   )
 }
@@ -81,7 +60,7 @@ export function CaseDetails() {
           <p className="kicker">Case {caseFile.id}</p>
           <h1>Report details</h1>
         </div>
-        <Link className="ghost-btn" to="/app">
+        <Link className="ghost-btn" to={er.role === 'ngo' ? '/app' : '/who'}>
           Back
         </Link>
       </header>
@@ -96,7 +75,7 @@ export function CaseDetails() {
         />
         {elevated && (
           <Link className="ghost-btn page-cta" to={`/case/${caseId}/alert`}>
-            Continue — severity is above expected
+            Continue
           </Link>
         )}
       </div>
@@ -110,19 +89,40 @@ export function SeverityAlert() {
   const caseFile = er.cases.find((item) => item.id === caseId)
   const priority = caseFile?.report?.priority || caseFile?.priority || 'MEDIUM'
   const severity = caseFile?.report?.severity
+  const isNgo = er.role === 'ngo'
 
   return (
-    <div className="page-screen">
-      <p className="kicker">Dispatch</p>
-      <h1>Your severity is above expected</h1>
+    <div className="page-screen who-followup">
+      <p className="kicker">{isNgo ? 'Inbox' : 'Help is on the way'}</p>
+      <h1>{isNgo ? 'Take this case' : 'We will call you'}</h1>
       <p className="page-lead">
         Priority {priority}
-        {severity != null ? ` · ${severity}/10` : ''}. Help is being prepared. Next, send a phone number and live GPS
-        so responders can reach you.
+        {severity != null ? ` · ${severity}/10` : ''}.
+        {isNgo
+          ? ' A citizen filed this report. Take it, then call or open the dispatch map.'
+          : ' A response team is investigating. The organization may call you on the number you entered.'}
       </p>
-      <Link className="ghost-btn page-cta" to={`/case/${caseId}/contact`}>
-        Enter phone number and GPS
-      </Link>
+      {isNgo ? (
+        <>
+          <button
+            type="button"
+            className="ghost-btn page-cta"
+            onClick={() => er.handleClaim(caseId, er.reporterName)}
+          >
+            Take it
+          </button>
+          {caseFile?.phone && (
+            <a className="ghost-btn page-cta" href={`tel:${caseFile.phone}`}>
+              Call {caseFile.phone}
+            </a>
+          )}
+          <Link className="ghost-btn" to={`/case/${caseId}/contact`}>
+            Dispatch map
+          </Link>
+        </>
+      ) : (
+        <p className="pin-note">Keep your phone on. You can go back to the report any time.</p>
+      )}
       <Link className="pin-note" to={`/case/${caseId}`}>
         Back to report
       </Link>
