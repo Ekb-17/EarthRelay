@@ -1,0 +1,9 @@
+{
+  "name": "EarthRelay Response Team",
+  "access_defaults": {
+    "assigned_only": true,
+    "photos": true,
+    "location": true,
+    "contact_citizen": false
+  }
+}

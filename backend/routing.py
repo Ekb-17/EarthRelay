@@ -2,30 +2,30 @@
 
 from __future__ import annotations
 
-PHONE_NOTICE = "For critical or important info, the organization may call you."
+PHONE_NOTICE = "For urgent cases or when additional information is required for investigation and response, the organization may contact the reporter directly."
 
 TEAMS = {
     "earthrelay-org": {
         "id": "earthrelay-org",
-        "label": "EarthRelay organization",
-        "short": "Your org",
+        "label": "Waste / general",
+        "short": "Waste",
         "blurb": "Dumping, waste, and general environmental cases.",
     },
     "fire-team": {
         "id": "fire-team",
-        "label": "Fire response team",
-        "short": "Fire team",
-        "blurb": "Fire, smoke, burning, and earthquake reports.",
+        "label": "Fire / smoke",
+        "short": "Fire",
+        "blurb": "Fire, smoke, and burning reports.",
     },
     "water-unit": {
         "id": "water-unit",
-        "label": "Water unit",
+        "label": "Water",
         "short": "Water",
         "blurb": "Flood, sewage, and water pollution.",
     },
     "wildlife-unit": {
         "id": "wildlife-unit",
-        "label": "Wildlife unit",
+        "label": "Wildlife",
         "short": "Wildlife",
         "blurb": "Injured or at-risk wildlife.",
     },
@@ -35,7 +35,7 @@ TEAMS = {
 ROUTE_MAP = {
     "wildfire_smoke": "fire-team",
     "grass_fire": "fire-team",
-    "factory_smoke": "fire-team",
+    "factory_smoke": "earthrelay-org",
     "burning_trash": "fire-team",
     "earthquake": "fire-team",
     "illegal_dumping": "earthrelay-org",
@@ -68,12 +68,12 @@ RESPONSE_TEAMS = {
     "construction_debris": "debris removal team",
     "e_waste": "e-waste recovery team",
     "tires_dumped": "tire waste removal team",
-    "oil_spill": "oil spill response team",
+    "oil_spill": "organization",
     "sewage_discharge": "sanitation response team",
-    "water_pollution": "water pollution response team",
+    "water_pollution": "flood response team",
     "wildfire_smoke": "fire response team",
     "grass_fire": "fire response team",
-    "factory_smoke": "smoke response team",
+    "factory_smoke": "organization",
     "burning_trash": "fire response team",
     "flood_damage": "flood response team",
     "river_overflow": "flood response team",
@@ -84,8 +84,8 @@ RESPONSE_TEAMS = {
     "habitat_destruction": "habitat recovery team",
     "wildlife": "wildlife response team",
     "injured_wildlife": "wildlife rescue team",
-    "air_pollution": "air quality response team",
-    "chemical_spill": "hazardous materials team",
+    "air_pollution": "organization",
+    "chemical_spill": "organization",
     "earthquake": "earthquake response team",
     "other": "organization",
 }
@@ -134,6 +134,12 @@ def enrich_case(case: dict) -> dict:
     case.setdefault("phone_notice", PHONE_NOTICE)
     case.setdefault("claimed_by", "")
     case.setdefault("address", "")
+    case.setdefault("nearby", [])
+    case.setdefault("location_parts", {})
+    if not case.get("display_id"):
+        slug = str(case.get("id") or "0")
+        digits = "".join(ch for ch in slug if ch.isdigit()) or "0"
+        case["display_id"] = f"ER-{int(digits[-5:] or 0):05d}"
     return case
 
 

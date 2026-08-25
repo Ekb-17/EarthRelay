@@ -1,4 +1,4 @@
-"""Weather, air quality, wildlife, protected areas, and satellite layers."""
+"""Weather, wildlife, protected areas, and satellite layers."""
 
 from __future__ import annotations
 
@@ -18,7 +18,6 @@ from net import (
 
 GBIF_OCCURRENCE = "https://api.gbif.org/v1/occurrence/search"
 OPEN_METEO_WEATHER = "https://api.open-meteo.com/v1/forecast"
-OPEN_METEO_AIR = "https://air-quality-api.open-meteo.com/v1/air-quality"
 NATURAL_EARTH_PARKS = (
     "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/"
     "geojson/ne_10m_parks_and_protected_lands_point.geojson"
@@ -263,44 +262,6 @@ async def load_weather(lat: float, lng: float) -> dict:
     }
 
 
-async def load_air_quality(lat: float, lng: float) -> dict:
-    payload = await fetch_json(
-        OPEN_METEO_AIR,
-        {
-            "latitude": f"{lat:.4f}",
-            "longitude": f"{lng:.4f}",
-            "current": "pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,ozone,us_aqi,european_aqi",
-            "timezone": "auto",
-        },
-    )
-    current = payload.get("current") or {}
-    us_aqi = current.get("us_aqi")
-    if us_aqi is None:
-        band = "unknown"
-    elif us_aqi <= 50:
-        band = "good"
-    elif us_aqi <= 100:
-        band = "moderate"
-    elif us_aqi <= 150:
-        band = "unhealthy_sensitive"
-    else:
-        band = "unhealthy"
-    return {
-        "source": "Open-Meteo Air Quality",
-        "lat": lat,
-        "lng": lng,
-        "us_aqi": us_aqi,
-        "european_aqi": current.get("european_aqi"),
-        "band": band,
-        "pm25": current.get("pm2_5"),
-        "pm10": current.get("pm10"),
-        "ozone": current.get("ozone"),
-        "no2": current.get("nitrogen_dioxide"),
-        "co": current.get("carbon_monoxide"),
-        "time": current.get("time"),
-    }
-
-
 async def load_environment() -> dict:
     wildlife, protected = await asyncio.gather(load_wildlife(), load_protected_areas())
     return {
@@ -313,7 +274,6 @@ async def load_environment() -> dict:
         },
         "sources": {
             "weather": ["Open-Meteo"],
-            "air": ["Open-Meteo"],
             "wildlife": ["GBIF IUCN CR/EN/VU"],
             "protected": ["Natural Earth parks", "UNESCO World Heritage"],
             "satellite": ["NASA GIBS"],

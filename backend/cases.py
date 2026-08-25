@@ -1,4 +1,4 @@
-"""Local case store so EarthRelay works without Supabase."""
+"""Case store: JSON on this machine, synced to Supabase when configured."""
 
 from __future__ import annotations
 
@@ -55,15 +55,19 @@ FAMILIES = {
         "construction_debris",
         "e_waste",
         "tires_dumped",
-        "oil_spill",
-        "sewage_discharge",
-        "chemical_spill",
-        "water_pollution",
     },
-    "fire": {"wildfire_smoke", "grass_fire", "factory_smoke", "burning_trash", "air_pollution", "earthquake"},
-    "water": {"flood_damage", "river_overflow", "urban_flooding", "erosion", "water_pollution", "oil_spill"},
+    "fire": {"wildfire_smoke", "grass_fire", "burning_trash"},
+    "water": {
+        "flood_damage",
+        "river_overflow",
+        "urban_flooding",
+        "erosion",
+        "water_pollution",
+        "sewage_discharge",
+    },
     "forest": {"deforestation", "illegal_logging", "habitat_destruction"},
     "wildlife": {"wildlife", "injured_wildlife"},
+    "quake": {"earthquake"},
 }
 
 
@@ -72,6 +76,13 @@ def family_of(incident_type: str) -> str:
         if incident_type in group:
             return name
     return "other"
+
+
+def _is_demo_case(case: dict) -> bool:
+    if case.get("demo"):
+        return True
+    cid = str(case.get("id") or "")
+    return len(cid) > 1 and cid[0] == "s" and cid[1:].isdigit()
 
 
 def utc_now() -> str:
@@ -83,6 +94,21 @@ def ensure_dirs() -> None:
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def next_display_id() -> str:
+    ensure_dirs()
+    best = 0
+    for path in CASES_DIR.glob("*.json"):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        raw = str(data.get("display_id") or "")
+        digits = "".join(ch for ch in raw if ch.isdigit())
+        if digits:
+            best = max(best, int(digits))
+    return f"ER-{best + 1:05d}"
+
+
 def case_path(case_id: str) -> Path:
     return CASES_DIR / f"{case_id}.json"
 
@@ -90,18 +116,42 @@ def case_path(case_id: str) -> Path:
 def save_case(case: dict) -> dict:
     ensure_dirs()
     case_path(case["id"]).write_text(json.dumps(case, indent=2), encoding="utf-8")
+    try:
+        from cloud import push_case
+
+        push_case(case)
+    except Exception:
+        pass
     return case
 
 
 def get_case(case_id: str) -> dict | None:
     path = case_path(case_id)
     if not path.exists():
+        try:
+            from cloud import pull_one
+
+            remote = pull_one(case_id)
+            if remote:
+                return enrich_case(remote)
+        except Exception:
+            return None
         return None
     return enrich_case(json.loads(path.read_text(encoding="utf-8")))
 
 
 def list_cases() -> list[dict]:
     ensure_dirs()
+    try:
+        from cloud import pull_cases
+
+        pull_cases()
+    except Exception:
+        pass
+    if not any(CASES_DIR.glob("*.json")):
+        from seed_demo_cases import seed_if_empty
+
+        seed_if_empty()
     cases = []
     for path in CASES_DIR.glob("*.json"):
         try:
@@ -112,16 +162,25 @@ def list_cases() -> list[dict]:
     return cases
 
 
-def find_duplicate(lat: float | None, lng: float | None, incident_type: str, radius_m: float = 300) -> dict | None:
+def find_duplicate(lat: float | None, lng: float | None, incident_type: str, radius_m: float | None = None) -> dict | None:
+    """Merge only another live report of the same incident family nearby. Demo / seed cases are ignored."""
     if lat is None or lng is None:
         return None
     family = family_of(incident_type)
+    if family == "other":
+        return None
+    if radius_m is None:
+        radius_m = 80 if family == "quake" else 300
     best = None
     best_dist = radius_m
     for case in list_cases():
-        if case.get("lat") is None or case.get("lng") is None:
+        if _is_demo_case(case):
+            continue
+        if case.get("status") == "resolved":
             continue
         if family_of(case.get("incident_type") or "other") != family:
+            continue
+        if case.get("lat") is None or case.get("lng") is None:
             continue
         dist = haversine_m(lat, lng, float(case["lat"]), float(case["lng"]))
         if dist <= best_dist:
@@ -173,6 +232,8 @@ def create_case(
     last_name: str = "",
     address: str = "",
     location_source: str = "",
+    nearby: list | None = None,
+    location_parts: dict | None = None,
 ) -> dict:
     case_id = str(uuid.uuid4())[:8]
     incident = incident_type if incident_type in INCIDENT_TYPES else "other"
@@ -181,9 +242,11 @@ def create_case(
     image_url = f"/uploads/{case_id}_original.jpg"
     annotated_url = f"/uploads/{case_id}_annotated.jpg"
     location_text = address or format_location(lat, lng)
+    display_id = next_display_id()
     case = {
         "id": case_id,
-        "title": title or f"Case {case_id}",
+        "display_id": display_id,
+        "title": title or f"Case {display_id}",
         "incident_type": incident,
         "status": "pending",
         "priority": "LOW",
@@ -200,10 +263,16 @@ def create_case(
         "lat": lat,
         "lng": lng,
         "address": location_text,
+        "nearby": list(nearby or []),
+        "location_parts": dict(location_parts or {}),
         "claimed_by": "",
         "claimed_at": None,
+        "assignment": None,
         "location_source": location_source or ("gps" if lat is not None else ""),
         "location_accuracy_m": None,
+        "activity": [],
+        "last_call_at": None,
+        "last_call_result": "",
         "created_at": utc_now(),
         "updated_at": utc_now(),
         "original_name": original_name,
@@ -247,6 +316,42 @@ def update_case(case_id: str, **changes) -> dict | None:
                 "detail": changes.get("detail") or f"Status set to {changes['status']}.",
             }
         )
+    if changes.get("priority") in ("LOW", "MEDIUM", "HIGH"):
+        case["priority"] = changes["priority"]
+        report = case.get("report")
+        if isinstance(report, dict):
+            report["priority"] = changes["priority"]
+        case["timeline"].append(
+            {
+                "at": utc_now(),
+                "status": case.get("status"),
+                "detail": changes.get("detail") or f"Priority set to {changes['priority']}.",
+            }
+        )
+    if isinstance(changes.get("assignment"), dict):
+        case["assignment"] = changes["assignment"]
+        label = changes["assignment"].get("responder_name") or "a responder"
+        need = changes["assignment"].get("need_label") or changes["assignment"].get("need") or "a field task"
+        case["timeline"].append(
+            {
+                "at": utc_now(),
+                "status": case.get("status"),
+                "detail": f"Assigned {need} to {label}.",
+            }
+        )
+        if case.get("status") == "pending":
+            case["status"] = "under_investigation"
+    if changes.get("assignment_status") and isinstance(case.get("assignment"), dict):
+        next_status = str(changes["assignment_status"])
+        if next_status in ("pending", "accepted", "in_progress", "done"):
+            case["assignment"]["status"] = next_status
+            case["timeline"].append(
+                {
+                    "at": utc_now(),
+                    "status": case.get("status"),
+                    "detail": f"Field task {next_status}.",
+                }
+            )
     if changes.get("assigned_team") in TEAMS:
         case["assigned_team"] = changes["assigned_team"]
         meta = TEAM_META.get(changes["assigned_team"])
@@ -275,6 +380,10 @@ def update_case(case_id: str, **changes) -> dict | None:
         )
     if "address" in changes and changes["address"] is not None:
         case["address"] = changes["address"]
+    if "nearby" in changes and changes["nearby"] is not None:
+        case["nearby"] = changes["nearby"]
+    if "location_parts" in changes and changes["location_parts"] is not None:
+        case["location_parts"] = changes["location_parts"]
     if "notes" in changes and changes["notes"] is not None:
         case["notes"] = changes["notes"]
     if changes.get("title"):
@@ -298,6 +407,33 @@ def update_case(case_id: str, **changes) -> dict | None:
         case["location_source"] = changes["location_source"]
     if changes.get("location_accuracy_m") is not None:
         case["location_accuracy_m"] = changes["location_accuracy_m"]
+    if changes.get("activity_kind"):
+        kind = str(changes["activity_kind"])
+        result = str(changes.get("activity_result") or "")
+        by = str(changes.get("activity_by") or "").strip()
+        labels = {
+            "no_answer": "Called — no answer",
+            "spoke": "Called — spoke",
+            "left_message": "Called — left message",
+            "on_site": "On site",
+            "cleanup_started": "Cleanup started",
+        }
+        entry = {"at": utc_now(), "kind": kind, "result": result, "by": by, "label": labels.get(result, result)}
+        case.setdefault("activity", []).append(entry)
+        if kind == "call":
+            case["last_call_at"] = entry["at"]
+            case["last_call_result"] = result
+        if result == "on_site" and case.get("status") == "pending":
+            case["status"] = "under_investigation"
+        if result == "cleanup_started":
+            case["status"] = "cleanup_scheduled"
+        case["timeline"].append(
+            {
+                "at": entry["at"],
+                "status": case.get("status"),
+                "detail": f"{by + ': ' if by else ''}{entry['label']}.",
+            }
+        )
     if changes.get("lat") is not None and case.get("lng") is not None:
         source = case.get("location_source") or "map_pin"
         acc = case.get("location_accuracy_m")
@@ -324,6 +460,7 @@ def cases_geojson() -> dict:
                 "geometry": {"type": "Point", "coordinates": [case["lng"], case["lat"]]},
                 "properties": {
                     "id": case["id"],
+                    "display_id": case.get("display_id") or case["id"],
                     "hazard": "case",
                     "title": case["title"],
                     "severity": (case.get("report") or {}).get("priority") or case.get("priority"),
@@ -341,3 +478,20 @@ def cases_geojson() -> dict:
             }
         )
     return {"type": "FeatureCollection", "features": features}
+
+
+def nearby_cases(case_id: str, radius_m: float = 1000) -> list[dict]:
+    origin = get_case(case_id)
+    if not origin or origin.get("lat") is None or origin.get("lng") is None:
+        return []
+    nearby = []
+    for other in list_cases():
+        if other["id"] == case_id:
+            continue
+        if other.get("lat") is None or other.get("lng") is None:
+            continue
+        dist = haversine_m(origin["lat"], origin["lng"], other["lat"], other["lng"])
+        if dist <= radius_m:
+            nearby.append({**other, "distance_m": round(dist)})
+    nearby.sort(key=lambda item: item["distance_m"])
+    return nearby

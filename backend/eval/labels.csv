@@ -1,0 +1,210 @@
+path,truth_kind,truth_type,bait_type,notes
+photos/flood/flood-HIGH-1.png,flood,flood_damage,illegal_dumping,
+photos/flood/flood-HIGH-10.png,flood,flood_damage,illegal_dumping,
+photos/flood/flood-HIGH-11.png,flood,flood_damage,illegal_dumping,
+photos/flood/flood-HIGH-12.png,flood,flood_damage,illegal_dumping,
+photos/flood/flood-HIGH-13.png,flood,flood_damage,illegal_dumping,HIGH / whole intersection underwater; was MEDIUM-1
+photos/flood/flood-HIGH-14.png,flood,flood_damage,illegal_dumping,HIGH / pipe and crane at washed riverbank; was sewage HIGH-1
+photos/flood/flood-HIGH-2.png,flood,flood_damage,illegal_dumping,
+photos/flood/flood-HIGH-4.png,flood,flood_damage,illegal_dumping,
+photos/flood/flood-HIGH-5.png,flood,flood_damage,illegal_dumping,
+photos/flood/flood-HIGH-6.png,flood,flood_damage,illegal_dumping,
+photos/flood/flood-HIGH-8.png,flood,flood_damage,illegal_dumping,
+photos/flood/flood-HIGH-9.png,flood,flood_damage,illegal_dumping,
+photos/flood/flood-MEDIUM-2.png,flood,flood_damage,illegal_dumping,
+photos/fire/fire-HIGH-1.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-10.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-12.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-13.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-14.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-16.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-18.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-19.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-20.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-21.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-22.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-23.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-24 (2).png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-24.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-25.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-26.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-27.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-28.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-3.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-4.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-5.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-6.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-7.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-8.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-HIGH-9.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-MEDIUM-1.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-MEDIUM-2.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-MEDIUM-3.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-MEDIUM-4.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-MEDIUM-5.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-MEDIUM-6.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-MEDIUM-7.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-MEDIUM-8.png,fire,wildfire_smoke,illegal_dumping,
+photos/fire/fire-MEDIUM-9.png,fire,wildfire_smoke,illegal_dumping,
+photos/collapse/collapse-HIGH-1.png,collapse,earthquake,illegal_dumping,
+photos/collapse/collapse-HIGH-2.png,collapse,earthquake,illegal_dumping,
+photos/collapse/collapse-HIGH-3.png,collapse,earthquake,illegal_dumping,
+photos/collapse/collapse-HIGH-4.png,collapse,earthquake,illegal_dumping,
+photos/collapse/collapse-HIGH-5.png,collapse,earthquake,illegal_dumping,
+photos/collapse/collapse-HIGH-6.png,collapse,earthquake,illegal_dumping,
+photos/collapse/collapse-HIGH-7.png,collapse,earthquake,illegal_dumping,
+photos/collapse/collapse-HIGH-8.png,collapse,earthquake,illegal_dumping,
+photos/collapse/collapse-HIGH-9.png,collapse,earthquake,illegal_dumping,
+photos/collapse/collapse-LOW-1.png,collapse,earthquake,illegal_dumping,
+photos/collapse/collapse-MEDIUM-1.png,collapse,earthquake,illegal_dumping,
+photos/waste/waste-HIGH-1.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-10.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-11.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-12.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-13.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-14.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-15.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-2.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-3.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-4.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-5.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-6.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-7.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-8.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-HIGH-9.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-LOW-1.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-LOW-2.png,waste,illegal_dumping,flood_damage,LOW / dumpster overflow; faint stock watermark kept
+photos/waste/waste-LOW-3.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-LOW-4.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-LOW-5.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-LOW-6.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-MEDIUM-1.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-MEDIUM-2.png,waste,illegal_dumping,flood_damage,
+photos/waste/waste-MEDIUM-3.png,waste,illegal_dumping,flood_damage,
+photos/sewage/sewage-HIGH-2.png,sewage,sewage_discharge,illegal_dumping,
+photos/sewage/sewage-HIGH-5.png,sewage,sewage_discharge,illegal_dumping,
+photos/sewage/sewage-MEDIUM-1.png,sewage,sewage_discharge,illegal_dumping,
+photos/sewage/sewage-MEDIUM-2.png,sewage,sewage_discharge,illegal_dumping,
+photos/erosion/erosion-HIGH-1.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-10.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-11.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-12.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-13.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-14.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-15.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-16.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-17.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-18.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-19.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-2.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-20.png,erosion,erosion,illegal_dumping,HIGH / mudslide road collapse; was flood-HIGH-7
+photos/erosion/erosion-HIGH-21.png,erosion,erosion,illegal_dumping,HIGH / washed-out road / mudslide; was flood-HIGH-3
+photos/erosion/erosion-HIGH-3.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-4.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-5.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-6.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-7.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-8.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-HIGH-9.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-LOW-1.png,erosion,erosion,illegal_dumping,
+photos/erosion/erosion-MEDIUM-1.png,erosion,erosion,illegal_dumping,
+photos/deforestation/deforestation-HIGH-1.png,deforestation,deforestation,illegal_dumping,
+photos/deforestation/deforestation-HIGH-2.png,deforestation,deforestation,illegal_dumping,
+photos/deforestation/deforestation-HIGH-3.png,deforestation,deforestation,illegal_dumping,
+photos/deforestation/deforestation-HIGH-4.png,deforestation,deforestation,illegal_dumping,
+photos/deforestation/deforestation-LOW-1.png,deforestation,deforestation,illegal_dumping,
+photos/deforestation/deforestation-MEDIUM-1.png,deforestation,deforestation,illegal_dumping,
+photos/deforestation/deforestation-MEDIUM-2.png,deforestation,deforestation,illegal_dumping,
+photos/deforestation/deforestation-MEDIUM-3.png,deforestation,deforestation,illegal_dumping,
+photos/deforestation/deforestation-MEDIUM-4.png,deforestation,deforestation,illegal_dumping,
+photos/wildlife/wildlife-HIGH-1.png,wildlife,wildlife,illegal_dumping,
+photos/wildlife/wildlife-HIGH-2.png,wildlife,wildlife,illegal_dumping,
+photos/wildlife/wildlife-HIGH-3.png,wildlife,wildlife,illegal_dumping,
+photos/wildlife/wildlife-HIGH-4.png,wildlife,wildlife,illegal_dumping,
+photos/wildlife/wildlife-HIGH-5.png,wildlife,wildlife,illegal_dumping,
+photos/wildlife/wildlife-HIGH-6.png,wildlife,wildlife,illegal_dumping,
+photos/wildlife/wildlife-HIGH-7.png,wildlife,wildlife,illegal_dumping,
+photos/wildlife/wildlife-MEDIUM-1.png,wildlife,wildlife,illegal_dumping,
+photos/hard/collapse-NONE-1.png,collapse,earthquake,illegal_dumping,
+photos/hard/collapse-NONE-2.png,collapse,earthquake,illegal_dumping,
+photos/hard/deforestation-NONE-1.png,deforestation,deforestation,illegal_dumping,
+photos/hard/deforestation-NONE-2.png,deforestation,deforestation,illegal_dumping,
+photos/hard/deforestation-NONE-3.png,deforestation,deforestation,illegal_dumping,
+photos/hard/erosion-NONE-1.png,erosion,erosion,illegal_dumping,NONE / hard negative
+photos/hard/erosion-NONE-2.png,erosion,erosion,illegal_dumping,NONE / hard negative
+photos/hard/erosion-NONE-3.png,erosion,erosion,illegal_dumping,
+photos/hard/fire-NONE-1.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-10.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-11.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-12.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-13.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-14.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-15.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-16.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-17.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-18.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-19.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-2.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-20.png,fire,wildfire_smoke,illegal_dumping,
+photos/hard/fire-NONE-21.png,fire,wildfire_smoke,illegal_dumping,
+photos/hard/fire-NONE-22.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-23.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-24.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-25.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-26.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-27.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-28.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-29.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-3.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-30.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-31.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-32.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-33.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-34.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-35.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-36.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-37.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-38.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-39.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-4.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-40.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-41.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-42.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-43.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-44.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-45.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-46.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-47.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-48.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-49.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-5.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-50.png,fire,wildfire_smoke,illegal_dumping,"NONE / campfire, grill, or ceremonial bonfire"
+photos/hard/fire-NONE-6.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-7.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-8.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/fire-NONE-9.png,fire,wildfire_smoke,illegal_dumping,NONE / hard negative
+photos/hard/flood-NONE-1.png,flood,flood_damage,illegal_dumping,NONE / hard negative
+photos/hard/flood-NONE-2.png,flood,flood_damage,illegal_dumping,NONE / hard negative
+photos/hard/flood-NONE-3.png,flood,flood_damage,illegal_dumping,NONE / hard negative
+photos/hard/flood-NONE-4.png,flood,flood_damage,illegal_dumping,NONE / hard negative
+photos/hard/flood-NONE-5.png,flood,flood_damage,illegal_dumping,NONE / hard negative
+photos/hard/flood-NONE-6.png,flood,flood_damage,illegal_dumping,NONE / hard negative
+photos/hard/flood-NONE-7.png,flood,flood_damage,illegal_dumping,NONE / hard negative
+photos/hard/flood-NONE-8.png,flood,flood_damage,illegal_dumping,NONE / hard negative
+photos/hard/indoor-NONE-1.png,indoor,other,illegal_dumping,
+photos/hard/indoor-NONE-2.png,indoor,other,illegal_dumping,
+photos/hard/indoor-NONE-3.png,indoor,other,illegal_dumping,
+photos/hard/indoor-NONE-4.png,indoor,other,illegal_dumping,
+photos/hard/indoor-NONE-5.png,indoor,other,illegal_dumping,
+photos/hard/indoor-NONE-6.png,indoor,other,illegal_dumping,
+photos/hard/indoor-NONE-7.png,indoor,other,illegal_dumping,
+photos/hard/sewage-NONE-1.png,sewage,sewage_discharge,illegal_dumping,NONE / designed main outfall
+photos/hard/sewage-NONE-2.png,sewage,sewage_discharge,illegal_dumping,NONE / planned trench and pumps
+photos/hard/sewage-NONE-3.png,sewage,sewage_discharge,illegal_dumping,NONE / designed twin outfall
+photos/hard/sewage-NONE-4.png,sewage,sewage_discharge,illegal_dumping,NONE / watermarked drain overflow
+photos/hard/sewage-NONE-5.png,sewage,sewage_discharge,illegal_dumping,"NONE / dry sidewalk street work, no sewage water"
+photos/hard/sewage-NONE-6.png,sewage,sewage_discharge,illegal_dumping,NONE / planned night bypass pumps
+photos/hard/sewage-NONE-7.png,sewage,sewage_discharge,illegal_dumping,NONE / tarp channel construction
+photos/hard/waste-NONE-1.png,waste,illegal_dumping,flood_damage,NONE / tiled alamy watermarks
+photos/hard/waste-NONE-2.png,waste,illegal_dumping,flood_damage,NONE / waste contained in skips
+photos/hard/waste-NONE-3.png,waste,illegal_dumping,flood_damage,NONE / clean dry/wet waste demo

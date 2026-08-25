@@ -1,0 +1,139 @@
+[
+  {
+    "id": "green-valley",
+    "name": "Green Valley Volunteers",
+    "email": "greenvalley@example.org",
+    "role": "field_volunteer",
+    "kind": "group",
+    "status": "active",
+    "organization": "Green Valley Volunteers",
+    "capabilities": [
+      "cleanup",
+      "field_assessment"
+    ],
+    "access": {
+      "assigned_only": true,
+      "photos": true,
+      "location": true,
+      "contact_citizen": false
+    }
+  },
+  {
+    "id": "cleanup-team",
+    "name": "Community Cleanup Team",
+    "email": "cleanup@example.org",
+    "role": "field_volunteer",
+    "kind": "group",
+    "status": "active",
+    "organization": "Community Cleanup Team",
+    "capabilities": [
+      "cleanup",
+      "supplies"
+    ],
+    "access": {
+      "assigned_only": true,
+      "photos": true,
+      "location": true,
+      "contact_citizen": false
+    }
+  },
+  {
+    "id": "sarah",
+    "name": "Sarah \u2014 Field Volunteer",
+    "email": "sarah@example.org",
+    "role": "field_volunteer",
+    "kind": "person",
+    "status": "active",
+    "organization": "",
+    "capabilities": [
+      "field_assessment",
+      "documentation"
+    ],
+    "access": {
+      "assigned_only": true,
+      "photos": true,
+      "location": true,
+      "contact_citizen": false
+    }
+  },
+  {
+    "id": "local-relief",
+    "name": "Local Relief Group",
+    "email": "relief@example.org",
+    "role": "field_volunteer",
+    "kind": "group",
+    "status": "active",
+    "organization": "Local Relief Group",
+    "capabilities": [
+      "supplies",
+      "community"
+    ],
+    "access": {
+      "assigned_only": true,
+      "photos": true,
+      "location": true,
+      "contact_citizen": false
+    }
+  },
+  {
+    "id": "alex-pending",
+    "name": "Alex Rivera",
+    "email": "alex@example.org",
+    "role": "field_volunteer",
+    "kind": "person",
+    "status": "active",
+    "organization": "",
+    "capabilities": [
+      "cleanup",
+      "field_assessment"
+    ],
+    "access": {
+      "assigned_only": true,
+      "photos": true,
+      "location": true,
+      "contact_citizen": false
+    },
+    "updated_at": "2026-08-24T13:21:11.516980+00:00"
+  },
+  {
+    "id": "eimaan-khan-6556",
+    "name": "Eimaan Khan",
+    "email": "eimaankb@gmail.com",
+    "role": "field_volunteer",
+    "kind": "person",
+    "status": "active",
+    "organization": "",
+    "capabilities": [
+      "cleanup"
+    ],
+    "access": {
+      "assigned_only": true,
+      "photos": true,
+      "location": true,
+      "contact_citizen": false
+    },
+    "created_at": "2026-08-24T13:24:06.811360+00:00",
+    "updated_at": "2026-08-24T13:45:13.189904+00:00"
+  },
+  {
+    "id": "emaan-khan-bangash-6a6e",
+    "name": "Emaan KHAN BANGASH",
+    "email": "www.miamyalsake@gmail.com",
+    "role": "field_volunteer",
+    "kind": "person",
+    "status": "active",
+    "organization": "",
+    "capabilities": [
+      "cleanup",
+      "field_assessment"
+    ],
+    "access": {
+      "assigned_only": true,
+      "photos": true,
+      "location": true,
+      "contact_citizen": false
+    },
+    "created_at": "2026-08-24T13:48:39.327741+00:00",
+    "updated_at": "2026-08-24T14:33:59.263961+00:00"
+  }
+]

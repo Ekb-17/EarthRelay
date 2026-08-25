@@ -47,6 +47,11 @@ backend/data/uploads/*
 !backend/data/uploads/.gitkeep
 backend/data/cases/*
 !backend/data/cases/.gitkeep
+backend/eval/photos/**/*.jpg
+backend/eval/photos/**/*.jpeg
+backend/eval/photos/**/*.png
+backend/eval/photos/**/*.webp
+backend/eval/last_run.json
 *.cache
 
 # =========================

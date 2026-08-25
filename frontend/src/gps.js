@@ -18,7 +18,7 @@ export function gpsPageStatus() {
   }
   return {
     ok: true,
-    text: 'This is a secure page. Press Use GPS, then Allow. You should jump to your street on the map.',
+    text: 'This is a secure page. Location is read automatically when GPS is on.',
   }
 }
 
@@ -28,38 +28,30 @@ export function geoErrorMessage(err) {
     return 'Browser blocked location because the page is not https. Open the https EarthRelay link.'
   }
   if (code === 1) {
-    return 'You need to Allow location for this site. Phone GPS being on is not enough until you press Allow in the browser.'
+    return 'Location is blocked for this site. Allow location in the browser, then GPS turns green by itself.'
   }
   if (code === 2) {
-    return 'No GPS fix yet. Keep Location on, wait outside or by a window, then press Use GPS again.'
+    return 'GPS is off or has no fix yet. Turn Location on in Settings. This box turns green by itself when a fix arrives.'
   }
   if (code === 3) {
-    return 'GPS timed out. Keep Location on and try Use GPS again.'
+    return 'GPS timed out. Keep Location on. This box turns green by itself when a fix arrives.'
   }
-  return 'Could not read GPS. Press Allow, or tap the map on your street.'
+  return 'Could not read GPS. Turn Location on in your phone settings.'
 }
 
 export function blockedGpsStatus() {
   if (!navigator.geolocation) {
     return {
       kind: 'blocked',
-      label: 'GPS is not available',
+      label: 'GPS is off',
       hint: 'This browser cannot read location.',
-      prompt: {
-        title: 'Location is not available',
-        body: 'This browser cannot read GPS.',
-      },
     }
   }
   if (!window.isSecureContext) {
     return {
       kind: 'blocked',
-      label: 'GPS is blocked on this page',
-      hint: 'Open the https:// EarthRelay link. HTTP pages cannot use GPS.',
-      prompt: {
-        title: 'Location is blocked on this page',
-        body: 'Open the https:// EarthRelay link on your phone. Then we can ask to turn location on.',
-      },
+      label: 'GPS is off',
+      hint: 'Phone GPS can be on, but this http page cannot read it. Open the https EarthRelay link.',
     }
   }
   return null
@@ -67,17 +59,17 @@ export function blockedGpsStatus() {
 
 export function classifyGeoSuccess(coords) {
   const meters = Math.round(coords?.accuracy || 0)
-  if (meters > 1000) {
+  if (meters > 80) {
     return {
-      kind: 'broken',
-      label: 'GPS is on but not working',
-      hint: `Location is allowed, but this is only a network/Wi-Fi guess (±${meters} m), not a real GPS fix. Check your connection, turn Location on, or try outdoors.`,
+      kind: 'on',
+      label: 'GPS is on',
+      hint: `Live fix. Pin is within about ${meters} m — waiting for a closer street-level lock.`,
     }
   }
   return {
     kind: 'on',
-    label: 'GPS is on · allowed',
-    hint: `Allowed. Pin is within about ${meters} m.`,
+    label: 'GPS is on',
+    hint: `Live street-level fix, within about ${meters} m.`,
   }
 }
 
@@ -89,53 +81,34 @@ export function classifyGeoFailure(err, permission) {
     return {
       kind: 'off',
       label: 'GPS is off',
-      hint: 'Location is not allowed. Turn it on, then tap Yes.',
-      prompt: {
-        title: 'Turn on / allow location?',
-        body: 'Location is off or blocked for EarthRelay. Turn on Location / GPS, then tap Yes. The next popup is the browser asking Allow.',
-      },
+      hint: 'Location is not allowed for this site. Allow it in the browser. Continue stays locked until GPS is on.',
     }
   }
   if (code === 2 || code === 3) {
-    if (permission === 'granted') {
-      return {
-        kind: 'broken',
-        label: 'GPS is on but not working',
-        hint:
-          code === 3
-            ? 'Location is allowed, but the fix timed out. Check network, wait outdoors, then tap Use GPS again.'
-            : 'Location is allowed, but the phone could not get a fix. Check network, GPS signal, or try outdoors.',
-      }
-    }
     return {
       kind: 'off',
       label: 'GPS is off',
-      hint: 'Turn Location / GPS on in Settings, then tap Yes.',
-      prompt: {
-        title: 'Turn on / allow location?',
-        body: 'GPS looks off on this phone. Turn Location on in Settings, come back, and tap Yes.',
-      },
+      hint:
+        code === 3
+          ? 'No GPS fix yet. Keep Location on. This turns green by itself when the phone gets a lock. Continue stays locked until then.'
+          : 'Location looks off, or there is no GPS signal yet. Turn Location on in Settings. This turns green by itself when a fix arrives. Continue stays locked until then.',
     }
   }
   return {
     kind: 'off',
     label: 'GPS is off',
     hint: geoErrorMessage(err),
-    prompt: {
-      title: 'Turn on / allow location?',
-      body: `${geoErrorMessage(err)} Tap Yes to try again.`,
-    },
   }
 }
 
 export const IDLE_GPS = {
   kind: 'idle',
-  label: 'GPS not checked yet',
-  hint: 'Tap Use GPS. If it is off, we will ask to turn it on.',
+  label: 'Checking GPS…',
+  hint: 'Location is read automatically. No extra button is required.',
 }
 
 export const ASKING_GPS = {
   kind: 'asking',
-  label: 'Asking for GPS…',
-  hint: 'If the browser asks Allow, press Allow.',
+  label: 'Reading GPS…',
+  hint: 'If the browser asks Allow, press Allow. After that, this turns green by itself when GPS is on.',
 }

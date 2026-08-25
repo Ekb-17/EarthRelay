@@ -18,6 +18,7 @@ MODEL_CANDIDATES = [
 ]
 
 # COCO labels that can support an environmental investigation.
+# Household electronics and furniture are not treated as dumped e-waste.
 CASE_HINTS = {
     "person": "people on site",
     "bicycle": "access / activity",
@@ -27,8 +28,8 @@ CASE_HINTS = {
     "truck": "possible haul / dump vehicle",
     "boat": "waterway activity",
     "bird": "wildlife",
-    "cat": "wildlife / domestic animal",
-    "dog": "wildlife / domestic animal",
+    "cat": "animal present",
+    "dog": "animal present",
     "horse": "livestock",
     "sheep": "livestock",
     "cow": "livestock",
@@ -39,27 +40,30 @@ CASE_HINTS = {
     "backpack": "human presence",
     "handbag": "human presence",
     "suitcase": "possible dumped goods",
-    "bottle": "possible waste",
-    "cup": "possible waste",
-    "bowl": "possible waste",
-    "chair": "possible dumped goods",
-    "couch": "possible dumped goods",
-    "potted plant": "vegetation",
-    "bed": "possible dumped goods",
-    "tv": "possible e-waste",
-    "laptop": "possible e-waste",
-    "cell phone": "possible e-waste",
-    "microwave": "possible e-waste",
-    "oven": "possible e-waste",
-    "toaster": "possible e-waste",
-    "refrigerator": "possible e-waste",
-    "sink": "possible dumped goods",
-    "book": "possible dumped goods",
-    "vase": "possible dumped goods",
-    "scissors": "possible dumped goods",
-    "teddy bear": "possible dumped goods",
-    "hair drier": "possible e-waste",
-    "toothbrush": "possible waste",
+    "bottle": "possible waste if clustered outdoors",
+    "cup": "indoor / household object",
+    "bowl": "indoor / household object",
+    "chair": "indoor / household object",
+    "couch": "indoor / household object",
+    "potted plant": "indoor / household object",
+    "bed": "indoor / household object",
+    "tv": "indoor / household object",
+    "laptop": "indoor / household object",
+    "cell phone": "indoor / household object",
+    "keyboard": "indoor / household object",
+    "mouse": "indoor / household object",
+    "remote": "indoor / household object",
+    "microwave": "indoor / household object",
+    "oven": "indoor / household object",
+    "toaster": "indoor / household object",
+    "refrigerator": "indoor / household object",
+    "sink": "indoor / household object",
+    "book": "indoor / household object",
+    "vase": "indoor / household object",
+    "scissors": "indoor / household object",
+    "teddy bear": "indoor / household object",
+    "hair drier": "indoor / household object",
+    "toothbrush": "indoor / household object",
     "fire hydrant": "urban infrastructure",
     "stop sign": "roadside scene",
     "parking meter": "urban infrastructure",
@@ -103,7 +107,7 @@ def detect_image(image_path: Path, annotated_path: Path) -> dict:
         source=str(image_path),
         device="cpu",
         imgsz=640,
-        conf=0.25,
+        conf=0.4,
         verbose=False,
     )
     result = results[0]
@@ -142,8 +146,38 @@ def detect_image(image_path: Path, annotated_path: Path) -> dict:
 
 
 def _summary(labels: list[str], hints: list[str]) -> str:
+    indoor = {
+        "laptop",
+        "tv",
+        "cell phone",
+        "keyboard",
+        "mouse",
+        "remote",
+        "microwave",
+        "oven",
+        "toaster",
+        "refrigerator",
+        "sink",
+        "toilet",
+        "couch",
+        "bed",
+        "chair",
+        "dining table",
+        "book",
+        "clock",
+        "vase",
+        "cup",
+        "bowl",
+        "potted plant",
+    }
     if not labels:
         return "No objects detected above confidence threshold. Review the photo manually."
+    if labels and all(label in indoor or label in {"person"} for label in labels):
+        top = ", ".join(sorted(set(labels))[:8])
+        return f"Detected indoor / ordinary objects ({top}). Not scored as a field environmental incident."
     top = ", ".join(sorted(set(labels))[:8])
-    hint_text = "; ".join(hints[:4])
-    return f"Detected {len(labels)} object(s): {top}. Investigation hints: {hint_text}."
+    useful_hints = [hint for hint in hints if "household" not in hint]
+    hint_text = "; ".join(useful_hints[:4])
+    if hint_text:
+        return f"Detected {len(labels)} object(s): {top}. Investigation hints: {hint_text}."
+    return f"Detected {len(labels)} object(s): {top}."

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from urllib.parse import quote
 
 from net import NETWORK_ERRORS, fetch_json_sync
@@ -337,8 +338,190 @@ def _query_hit(item: dict, query: str) -> bool:
     return any(token.startswith(q) for token in tokens)
 
 
+def _dist_m(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    radius = 6371000
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp = math.radians(lat2 - lat1)
+    dl = math.radians(lng2 - lng1)
+    a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * radius * math.asin(math.sqrt(a))
+
+
+def _amenity_kind(tags: dict) -> str:
+    amenity = (tags.get("amenity") or "").lower()
+    religion = (tags.get("religion") or "").lower()
+    shop = tags.get("shop")
+    highway = tags.get("highway")
+    if amenity in {"hospital"}:
+        return "Hospital"
+    if amenity in {"clinic", "doctors"}:
+        return "Clinic"
+    if amenity == "pharmacy":
+        return "Pharmacy"
+    if amenity == "veterinary":
+        return "Animal hospital"
+    if amenity in {"school", "kindergarten"}:
+        return "School"
+    if amenity in {"college", "university"}:
+        return "College"
+    if amenity == "place_of_worship":
+        if religion in {"muslim", "islam"}:
+            return "Mosque"
+        if religion == "christian":
+            return "Church"
+        return "Place of worship"
+    if amenity == "marketplace":
+        return "Market"
+    if amenity == "fuel":
+        return "Fuel station"
+    if shop:
+        return "Shop"
+    if highway == "bus_stop":
+        return "Bus stop"
+    if tags.get("leisure") == "park":
+        return "Park"
+    return amenity.replace("_", " ").title() or "Place"
+
+
+def _nearby_places(lat: float, lng: float) -> list[dict]:
+    query = (
+        "[out:json][timeout:8];"
+        f"(nwr(around:450,{lat},{lng})[amenity~\"^(hospital|clinic|doctors|pharmacy|school|college|university|kindergarten|place_of_worship|marketplace|veterinary|fuel)$\"];"
+        f"nwr(around:450,{lat},{lng})[shop];"
+        f"nwr(around:450,{lat},{lng})[highway=bus_stop];"
+        f"nwr(around:450,{lat},{lng})[leisure=park];);"
+        "out tags center 40;"
+    )
+    try:
+        payload = fetch_json_sync(
+            "https://overpass-api.de/api/interpreter",
+            {"data": query},
+            timeout=10,
+        )
+    except NETWORK_ERRORS:
+        return []
+    nearby = []
+    seen = set()
+    for el in payload.get("elements") or []:
+        tags = el.get("tags") or {}
+        name = tags.get("name") or tags.get("name:en")
+        if not name:
+            continue
+        elat = el.get("lat") or (el.get("center") or {}).get("lat")
+        elng = el.get("lon") or (el.get("center") or {}).get("lon")
+        if elat is None or elng is None:
+            continue
+        key = name.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        nearby.append(
+            {
+                "name": name,
+                "kind": _amenity_kind(tags),
+                "distance_m": round(_dist_m(lat, lng, float(elat), float(elng))),
+            }
+        )
+    nearby.sort(key=lambda item: item["distance_m"])
+    return nearby[:12]
+
+
+def _label_from_nominatim(row: dict) -> tuple[str, dict]:
+    addr = row.get("address") or {}
+    parts = []
+    for key in (
+        "house_number",
+        "house_name",
+        "road",
+        "pedestrian",
+        "residential",
+        "neighbourhood",
+        "suburb",
+        "quarter",
+        "city_block",
+        "city_district",
+        "district",
+        "hamlet",
+        "village",
+        "town",
+        "city",
+        "municipality",
+        "county",
+        "state",
+        "postcode",
+        "country",
+    ):
+        value = addr.get(key)
+        if value and value not in parts:
+            parts.append(value)
+    label = ", ".join(parts) or row.get("display_name") or ""
+    detail = {
+        "road": addr.get("road") or addr.get("pedestrian") or addr.get("residential") or "",
+        "area": (
+            addr.get("suburb")
+            or addr.get("neighbourhood")
+            or addr.get("quarter")
+            or addr.get("city_district")
+            or addr.get("hamlet")
+            or ""
+        ),
+        "city": addr.get("city") or addr.get("town") or addr.get("village") or addr.get("municipality") or "",
+        "state": addr.get("state") or "",
+        "country": addr.get("country") or "",
+    }
+    return label, detail
+
+
+def _photon_poi(lat: float, lng: float) -> str:
+    try:
+        payload = fetch_json_sync(
+            PHOTON_REVERSE_URL,
+            {"lat": str(lat), "lon": str(lng), "lang": "en"},
+            timeout=6,
+        )
+        feature = (payload.get("features") or [None])[0]
+        if not feature:
+            return ""
+        props = feature.get("properties") or {}
+        return props.get("name") or ""
+    except NETWORK_ERRORS:
+        return ""
+
+
+def describe_location(lat: float, lng: float, include_nearby: bool = True) -> dict:
+    """Street, area, city, and nearby places for a GPS pin."""
+    label = ""
+    detail = {"road": "", "area": "", "city": "", "state": "", "country": ""}
+    try:
+        row = fetch_json_sync(
+            f"{NOMINATIM_REVERSE_URL}?lat={lat}&lon={lng}&format=json&zoom=18&addressdetails=1",
+            timeout=10,
+        )
+        if row:
+            label, detail = _label_from_nominatim(row)
+    except NETWORK_ERRORS:
+        pass
+    poi = _photon_poi(lat, lng)
+    if poi and poi not in (label or ""):
+        label = f"{poi}, {label}" if label else poi
+    if not label:
+        label = reverse_geocode(lat, lng)
+    nearby = _nearby_places(lat, lng) if include_nearby else []
+    return {
+        "lat": lat,
+        "lng": lng,
+        "label": label,
+        "road": detail.get("road") or "",
+        "area": detail.get("area") or "",
+        "city": detail.get("city") or "",
+        "state": detail.get("state") or "",
+        "country": detail.get("country") or "",
+        "nearby": nearby,
+    }
+
+
 def reverse_geocode(lat: float, lng: float) -> str:
-    """Street-style address from GPS. Photon first, Nominatim backup."""
+    """Street-style address from GPS. Nominatim first, Photon backup."""
     try:
         payload = fetch_json_sync(
             PHOTON_REVERSE_URL,

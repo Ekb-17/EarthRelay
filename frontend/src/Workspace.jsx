@@ -1,24 +1,22 @@
-import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Activity,
-  AlertTriangle,
   CloudSun,
   Droplets,
   FolderOpen,
-  ImagePlus,
   PawPrint,
   RefreshCw,
   Satellite,
   Trees,
   Waves,
-  Wind,
 } from 'lucide-react'
 import HazardMap from './HazardMap.jsx'
 import LocationPrompt from './LocationPrompt.jsx'
 import PlaceSearch from './PlaceSearch.jsx'
-import { INCIDENT_TYPES, useEarthRelay } from './context.jsx'
-import { PHONE_NOTICE, STATUS_LABELS, TEAMS, forwardSentence, responseTeam } from './routing.js'
+import { displayCaseId, incidentTypeLabel, reporterDisplayName, reporterMention, useEarthRelay } from './context.jsx'
+import { fetchHealth } from './api.js'
+import { STATUS_LABELS, TEAMS, responseTeam, staffDeskLabel } from './routing.js'
 
 const LAYER_ICONS = {
   satellite: Satellite,
@@ -26,7 +24,6 @@ const LAYER_ICONS = {
   tsunami: Waves,
   flood: Droplets,
   weather: CloudSun,
-  air: Wind,
   wildlife: PawPrint,
   protected: Trees,
   case: FolderOpen,
@@ -38,7 +35,6 @@ const LAYER_META = [
   { id: 'tsunami', label: 'Tsunamis', detail: 'NOAA NCEI historical' },
   { id: 'flood', label: 'Floods', detail: 'NASA EONET + GDACS' },
   { id: 'weather', label: 'Weather', detail: 'Click a pin for wind and rain' },
-  { id: 'air', label: 'Air quality', detail: 'Click a pin for AQI' },
   { id: 'wildlife', label: 'Wildlife', detail: 'GBIF threatened species' },
   { id: 'protected', label: 'Protected areas', detail: 'Natural Earth + UNESCO' },
   { id: 'case', label: 'EarthRelay cases', detail: 'Uploaded files' },
@@ -54,21 +50,25 @@ function formatTime(value) {
 export default function Workspace() {
   const navigate = useNavigate()
   const er = useEarthRelay()
-  const isNgo = er.role === 'ngo'
   const [inboxTeam, setInboxTeam] = useState('all')
-  if (!isNgo) return <Navigate to="/who" replace />
+  const [cloud, setCloud] = useState(null)
+  const [layersOpen, setLayersOpen] = useState(false)
+
+  useEffect(() => {
+    er.chooseRole('ngo')
+  }, [])
+
+  useEffect(() => {
+    fetchHealth()
+      .then((data) => setCloud(data.supabase || null))
+      .catch(() => setCloud(null))
+  }, [])
+
   const inboxCases = er.cases.filter((item) => {
     if (inboxTeam === 'all') return true
     if (inboxTeam === 'unclaimed') return !item.claimed_by
     return (item.routed_to || item.assigned_team) === inboxTeam
   })
-
-  async function onSubmit(event) {
-    event.preventDefault()
-    const created = await er.handleUpload()
-    if (!created?.id) return
-    navigate(`/case/${created.id}`)
-  }
 
   return (
     <div className="app-shell">
@@ -87,14 +87,11 @@ export default function Workspace() {
         }}
       />
       <header className="topbar">
-        <div>
-          <p className="kicker">EarthRelay</p>
-          <h1>{isNgo ? 'NGO inbox' : 'File a report'}</h1>
-        </div>
+        <h1>Cases</h1>
         <div className="topbar-meta">
-          <Link className="ghost-btn" to="/role">
-            Switch role
-          </Link>
+          <span className={`inbox-cloud ${cloud?.ok ? 'is-live' : ''}`}>
+            {cloud?.ok ? 'Cloud inbox' : 'Local inbox'}
+          </span>
           <span className={`live-dot ${er.error ? 'is-error' : ''}`} />
           <span>{er.error ? 'Backend offline' : er.loading ? 'Updating' : `${inboxCases.length} in inbox`}</span>
           <button type="button" className="ghost-btn" onClick={er.load} disabled={er.loading}>
@@ -104,67 +101,13 @@ export default function Workspace() {
       </header>
 
       <aside className="sidebar">
-        {!isNgo && (
-        <section>
-          <h2>File a report</h2>
-          <form className="upload-form" onSubmit={onSubmit}>
-            <label className="file-btn">
-              <ImagePlus size={16} />
-              {er.file ? er.file.name : 'Upload site photo'}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(event) => er.setFile(event.target.files?.[0] || null)}
-              />
-            </label>
-            <select value={er.incidentType} onChange={(event) => er.setIncidentType(event.target.value)}>
-              {INCIDENT_TYPES.map(([id, label]) => (
-                <option key={id} value={id}>
-                  {label}
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              placeholder={isNgo ? 'Officer / desk name' : 'Your name (optional)'}
-              value={er.reporterName}
-              onChange={(event) => er.setReporterName(event.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Case title"
-              value={er.title}
-              onChange={(event) => er.setTitle(event.target.value)}
-            />
-            <textarea
-              placeholder="Notes for investigators"
-              value={er.notes}
-              onChange={(event) => er.setNotes(event.target.value)}
-              rows={3}
-            />
-            <p className="pin-note">
-              {er.pin
-                ? `Pinned ${er.pin.lat.toFixed(3)}, ${er.pin.lng.toFixed(3)}`
-                : 'Pin the map or use GPS, then submit.'}
-            </p>
-            <p className="forward-note">{forwardSentence(er.incidentType)}</p>
-            <p className="pin-note">({PHONE_NOTICE})</p>
-            {er.error && (
-              <p className="banner">
-                <AlertTriangle size={16} /> {er.error}
-              </p>
-            )}
-            <button type="submit" className="ghost-btn" disabled={er.uploading}>
-              {er.uploading ? 'Building full case report…' : 'Submit report'}
-            </button>
-          </form>
-        </section>
-        )}
-
-        {isNgo && (
-          <section className="inbox-section">
+        <section className="inbox-section">
             <h2>Inbox</h2>
-            <p className="layer-help">Cases filed on this official EarthRelay land here. Take a case, then call or dispatch.</p>
+            <p className="layer-help">
+              {cloud?.ok
+                ? 'Cases filed on the phone land here and in Supabase, so this laptop and the phone share one inbox.'
+                : 'Cases filed on this EarthRelay land here. Take a case, then call or dispatch.'}
+            </p>
             <input
               type="text"
               placeholder="Your desk name (used when you take a case)"
@@ -198,40 +141,41 @@ export default function Workspace() {
               ))}
             </div>
           </section>
-        )}
 
-        <section>
-          <h2>Map layers</h2>
-          {LAYER_META.map((layer) => {
-            const Icon = LAYER_ICONS[layer.id]
-            const count = er.payload?.counts?.[layer.id]
-            return (
-              <label key={layer.id} className={`layer-row ${layer.id}`}>
-                <input
-                  type="checkbox"
-                  checked={er.layers[layer.id]}
-                  onChange={() =>
-                    er.setLayers((current) => ({ ...current, [layer.id]: !current[layer.id] }))
-                  }
-                />
-                <Icon size={18} />
-                <span>
-                  <strong>{layer.label}</strong>
-                  <small>{layer.detail}</small>
-                </span>
-                {count != null && <em>{count}</em>}
-              </label>
-            )
-          })}
+        <section className={`layer-section${layersOpen ? '' : ' is-collapsed'}`}>
+          <button type="button" className="layer-toggle" onClick={() => setLayersOpen((open) => !open)}>
+            Map layers {layersOpen ? 'Hide' : 'Show'}
+          </button>
+          {layersOpen
+            ? LAYER_META.map((layer) => {
+                const Icon = LAYER_ICONS[layer.id]
+                const count = er.payload?.counts?.[layer.id]
+                return (
+                  <label key={layer.id} className={`layer-row ${layer.id}`}>
+                    <input
+                      type="checkbox"
+                      checked={er.layers[layer.id]}
+                      onChange={() =>
+                        er.setLayers((current) => ({ ...current, [layer.id]: !current[layer.id] }))
+                      }
+                    />
+                    <Icon size={18} />
+                    <span>
+                      <strong>{layer.label}</strong>
+                      <small>{layer.detail}</small>
+                    </span>
+                    {count != null && <em>{count}</em>}
+                  </label>
+                )
+              })
+            : null}
         </section>
 
         <section className="event-list-wrap">
-          <h2>{isNgo ? 'Forwarded cases' : 'Your filings'}</h2>
+          <h2>Forwarded cases</h2>
           <div className="event-list">
             {inboxCases.length === 0 && !er.loading && (
-              <p className="empty">
-                {isNgo ? 'Inbox is empty. New citizen filings appear here automatically.' : 'No cases yet. Upload a photo to start detection.'}
-              </p>
+              <p className="empty">Inbox is empty. New citizen filings appear here automatically.</p>
             )}
             {inboxCases.map((item) => (
               <button
@@ -241,16 +185,25 @@ export default function Workspace() {
                 onClick={() => navigate(`/case/${item.id}`)}
               >
                 <span className="event-type">
-                  {item.report?.priority || item.priority || 'LOW'} · {STATUS_LABELS[item.status] || item.status}
+                  {displayCaseId(item)} · {item.report?.priority || item.priority || 'LOW'} · {STATUS_LABELS[item.status] || item.status}
                 </span>
                 <strong>{item.title}</strong>
+                <small>{reporterDisplayName(item)}</small>
                 <small>
-                  {item.routed_label || responseTeam(item.incident_type)}
-                  {item.claimed_by ? ` · taken by ${item.claimed_by}` : ' · unclaimed'}
+                  {item.routed_label || responseTeam(item.incident_type)} · {staffDeskLabel(item.claimed_by)}
                 </small>
+                {item.assignment?.responder_name ? (
+                  <small>
+                    Assigned to {item.assignment.responder_name}
+                    {item.assignment.need_label || item.assignment.need
+                      ? ` · ${item.assignment.need_label || item.assignment.need}`
+                      : ''}
+                  </small>
+                ) : null}
                 <small>
-                  {item.incident_type.replaceAll('_', ' ')} · {formatTime(item.created_at)}
+                  {incidentTypeLabel(item.incident_type)} · {formatTime(item.created_at)}
                 </small>
+                {reporterMention(item.notes) ? <small className="inbox-mention">{reporterMention(item.notes)}</small> : null}
               </button>
             ))}
           </div>

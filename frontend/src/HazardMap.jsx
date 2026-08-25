@@ -122,6 +122,7 @@ export default function HazardMap({
   onSelect,
   onInspect,
   placeTarget,
+  autoLocate = true,
 }) {
   const rootRef = useRef(null)
   const mapRef = useRef(null)
@@ -158,9 +159,13 @@ export default function HazardMap({
       onInspectRef.current?.({ lng: event.coords.longitude, lat: event.coords.latitude })
     })
     mapRef.current = map
+    const resize = () => map.resize()
+    const observer = new ResizeObserver(resize)
+    observer.observe(rootRef.current)
+    requestAnimationFrame(resize)
 
     map.on('load', () => {
-      if (window.isSecureContext) {
+      if (autoLocate && window.isSecureContext) {
         try {
           geolocate.trigger()
         } catch {
@@ -218,6 +223,7 @@ export default function HazardMap({
     })
 
     return () => {
+      observer.disconnect()
       searchMarker.current?.remove()
       searchMarker.current = null
       map.remove()
@@ -240,7 +246,7 @@ export default function HazardMap({
           { padding: 48, duration: 1100, maxZoom: 11 },
         )
       } else {
-        map.flyTo({ center: [lng, lat], zoom: Math.max(zoom || 16, 15), speed: 1.35 })
+        map.flyTo({ center: [lng, lat], zoom: Math.max(zoom || 18, 17), speed: 1.35, essential: true })
       }
       searchMarker.current?.remove()
       searchMarker.current = new mapboxgl.Marker({ color: '#34d399' })
