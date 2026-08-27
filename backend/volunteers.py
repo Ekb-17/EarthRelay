@@ -206,6 +206,11 @@ def load_org() -> dict:
         return dict(DEFAULT_ORG)
     merged = dict(DEFAULT_ORG)
     merged.update(data or {})
+    # Treat blank username / hash as unset so the setup screen still appears.
+    if not str(merged.get("username") or "").strip():
+        merged["username"] = ""
+    if not str(merged.get("password_hash") or "").strip():
+        merged.pop("password_hash", None)
     return merged
 
 
@@ -260,7 +265,7 @@ def _normalize_username(value: str) -> str:
 def setup_org_login(username: str, password: str, name: str = "", email: str = "") -> dict:
     org = load_org()
     if org.get("password_hash") and org.get("username"):
-        raise ValueError("Organization login is already set.")
+        raise ValueError("Organization login is already set. Sign in with the existing username and password.")
     user = _normalize_username(username)
     if not re.fullmatch(r"[a-z0-9._-]{3,40}", user or ""):
         raise ValueError("Username must be 3-40 letters, numbers, dots, or hyphens.")
@@ -272,6 +277,7 @@ def setup_org_login(username: str, password: str, name: str = "", email: str = "
     org["password_hash"] = hash_password(secret)
     org["recovery_email"] = recovery
     _persist_org(org)
+    # Same shape as a successful sign-in so the desk opens immediately after create.
     return public_org()
 
 

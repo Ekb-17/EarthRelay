@@ -365,7 +365,7 @@ export function Landing() {
             selectedId={null}
             onSelect={() => {}}
             onInspect={() => {}}
-            autoLocate={false}
+            autoLocate
           />
         </div>
       ) : null}

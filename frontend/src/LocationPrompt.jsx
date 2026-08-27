@@ -8,12 +8,26 @@ import {
   queryGeoPermission,
 } from './gps.js'
 
+/** ~20 m in degrees at mid-latitudes — ignore tiny GPS jitter. */
 function movedEnough(prev, next) {
   if (!prev) return true
   const dlat = prev.lat - next.lat
   const dlng = prev.lng - next.lng
   return dlat * dlat + dlng * dlng > 0.00018 * 0.00018
 }
+
+/** Prefer a clearly better fix (e.g. drop a stale city-level cache). */
+function betterFix(prev, next) {
+  if (!prev) return true
+  if (movedEnough(prev, next)) return true
+  const prevAcc = Number(prev.accuracy)
+  const nextAcc = Number(next.accuracy)
+  if (!Number.isFinite(prevAcc) || !Number.isFinite(nextAcc)) return false
+  return nextAcc + 25 < prevAcc
+}
+
+const FRESH_GPS = { enableHighAccuracy: true, timeout: 25000, maximumAge: 0 }
+const WATCH_GPS = { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
 
 export function useGpsGate({ onFix, autoCheck = true } = {}) {
   const onFixRef = useRef(onFix)
@@ -69,6 +83,8 @@ export function useGpsGate({ onFix, autoCheck = true } = {}) {
       onFixRef.current?.(fix)
     }
 
+    // maximumAge: 0 — never reuse another visitor's / earlier session's cached fix
+    // (that is what made Tarlai / Taramri stick for the next person on the same browser).
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         onFix(pos)
@@ -81,13 +97,13 @@ export function useGpsGate({ onFix, autoCheck = true } = {}) {
               accuracy: nextPos.coords.accuracy,
             }
             applyStatus(classifyGeoSuccess(nextPos.coords))
-            if (movedEnough(lastFixRef.current, fix)) {
+            if (betterFix(lastFixRef.current, fix)) {
               lastFixRef.current = fix
               onFixRef.current?.(fix)
             }
           },
           () => {},
-          { enableHighAccuracy: true, timeout: 30000, maximumAge: 5000 },
+          WATCH_GPS,
         )
       },
       async (err) => {
@@ -99,7 +115,7 @@ export function useGpsGate({ onFix, autoCheck = true } = {}) {
           stopWatch()
         }
       },
-      { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 },
+      FRESH_GPS,
     )
   }, [applyStatus, stopWatch])
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ImagePlus } from 'lucide-react'
 import LocationPrompt, { GpsStatus, useGpsGate } from './LocationPrompt.jsx'
@@ -56,22 +56,19 @@ export default function WhoYouAre() {
   const [phone, setPhone] = useState(er.phone || '')
   const [localError, setLocalError] = useState('')
   const [preview, setPreview] = useState('')
-  const firstFly = useRef(true)
-
   const gps = useGpsGate({
     onFix: ({ lat, lng, accuracy }) => {
+      // Always refresh pin + map target so a stale cached fix (e.g. Tarlai) cannot stick
+      // after a later real GPS reading for this visitor.
       er.setPin({ lat, lng, accuracy })
-      if (firstFly.current) {
-        firstFly.current = false
-        er.setPlaceTarget({
-          lat,
-          lng,
-          zoom: 18,
-          name: 'You are here',
-          label: 'You are here',
-          pickedAt: Date.now(),
-        })
-      }
+      er.setPlaceTarget({
+        lat,
+        lng,
+        zoom: 18,
+        name: 'You are here',
+        label: 'You are here',
+        pickedAt: Date.now(),
+      })
     },
   })
 
@@ -86,6 +83,7 @@ export default function WhoYouAre() {
   }, [er.file])
 
   useEffect(() => {
+    // chooseRole('citizen') clears any leftover pin from a prior demo on this tab.
     er.chooseRole('citizen')
   }, [])
 

@@ -281,6 +281,11 @@ export function EarthRelayProvider({ children }) {
     if (next === 'citizen' || next === 'volunteer') {
       setOrgAuthState(null)
     }
+    // Judges / next visitors must not inherit the previous tester's map pin.
+    if (next === 'citizen') {
+      setPin(null)
+      setPlaceTarget(null)
+    }
   }
 
   function setVolunteer(next) {

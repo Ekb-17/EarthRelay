@@ -5,19 +5,6 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 const EMPTY = { type: 'FeatureCollection', features: [] }
 const POINT_LAYERS = ['earthquake', 'tsunami', 'flood', 'wildlife', 'protected', 'case']
 
-const FREE_STYLE = {
-  version: 8,
-  sources: {
-    carto: {
-      type: 'raster',
-      tiles: ['https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png'],
-      tileSize: 256,
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-    },
-  },
-  layers: [{ id: 'carto', type: 'raster', source: 'carto' }],
-}
-
 const LAYER_PAINT = {
   earthquake: {
     'circle-radius': [
@@ -122,13 +109,16 @@ export default function HazardMap({
   onSelect,
   onInspect,
   placeTarget,
+  autoLocate = true,
 }) {
   const rootRef = useRef(null)
   const mapRef = useRef(null)
   const onSelectRef = useRef(onSelect)
   const onInspectRef = useRef(onInspect)
+  const autoLocateRef = useRef(autoLocate)
   onSelectRef.current = onSelect
   onInspectRef.current = onInspect
+  autoLocateRef.current = autoLocate
 
   const satWasOn = useRef(false)
   const searchMarker = useRef(null)
@@ -139,16 +129,21 @@ export default function HazardMap({
 
     mapboxgl.accessToken = token || 'unused'
 
+    // Neutral world view until THIS visitor's GPS arrives — never start on a prior tester's street.
     const map = new mapboxgl.Map({
       container: rootRef.current,
       style: token ? 'mapbox://styles/mapbox/streets-v12' : 'https://tiles.openfreemap.org/styles/liberty',
-      center: [69.35, 30.38],
-      zoom: 5,
+      center: [0, 20],
+      zoom: 1.6,
       attributionControl: true,
     })
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right')
     const geolocate = new mapboxgl.GeolocateControl({
-      positionOptions: { enableHighAccuracy: true },
+      positionOptions: {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 20000,
+      },
       trackUserLocation: true,
       showUserHeading: true,
       showAccuracyCircle: true,
@@ -160,7 +155,7 @@ export default function HazardMap({
     mapRef.current = map
 
     map.on('load', () => {
-      if (window.isSecureContext) {
+      if (autoLocateRef.current && window.isSecureContext) {
         try {
           geolocate.trigger()
         } catch {
@@ -223,6 +218,8 @@ export default function HazardMap({
       map.remove()
       mapRef.current = null
     }
+    // Mount once; layer/geojson updates happen in later effects.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {

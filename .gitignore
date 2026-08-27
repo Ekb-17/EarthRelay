@@ -47,6 +47,8 @@ backend/data/uploads/*
 !backend/data/uploads/.gitkeep
 backend/data/cases/*
 !backend/data/cases/.gitkeep
+# Org login is created on first visit (setup screen). Never commit a live password.
+backend/data/org.json
 *.cache
 
 # =========================

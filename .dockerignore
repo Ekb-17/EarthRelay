@@ -8,10 +8,14 @@ frontend/node_modules
 frontend/dist
 backend/data/uploads
 backend/data/cases
+# Never bake a local org password into the image — first deploy shows setup.
+backend/data/org.json
+backend/eval/photos
 *.pt
 *.onnx
 runs
 tools
 .env
-*.md
+**/.env
+_restored
 kernel.errors.txt

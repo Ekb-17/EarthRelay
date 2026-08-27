@@ -21,6 +21,7 @@ export function PasswordField({ label, value, onChange, autoComplete, minLength 
           required
           minLength={minLength}
           autoComplete={autoComplete}
+          enterKeyHint="done"
           value={value}
           onChange={(event) => onChange(event.target.value)}
         />
@@ -39,8 +40,8 @@ export function PasswordField({ label, value, onChange, autoComplete, minLength 
 
 const BRAND = {
   setup: {
-    title: 'Set up the organization desk',
-    copy: 'Create a username, password, and recovery email. You will need all three to sign in later.',
+    title: 'Create the organization login',
+    copy: 'First visit only. Choose a username, password, and recovery email for this desk. Judges and operators set their own — there is no shared password baked into the app.',
   },
   login: {
     title: 'Organization desk',
@@ -66,6 +67,7 @@ export default function OrgSignIn() {
   const [ready, setReady] = useState(false)
   const [needsSetup, setNeedsSetup] = useState(false)
   const [hasRecovery, setHasRecovery] = useState(false)
+  const [loadError, setLoadError] = useState('')
   const [step, setStep] = useState('login')
   const [orgName, setOrgName] = useState('')
   const [username, setUsername] = useState('')
@@ -76,6 +78,7 @@ export default function OrgSignIn() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
+  const [reloadToken, setReloadToken] = useState(0)
 
   useEffect(() => {
     if (er.orgAuth) er.setOrgAuth(null)
@@ -84,41 +87,57 @@ export default function OrgSignIn() {
 
   useEffect(() => {
     let cancelled = false
+    setReady(false)
+    setLoadError('')
     fetchOrg()
       .then((org) => {
         if (cancelled) return
-        setNeedsSetup(Boolean(org.setup))
+        const setup = Boolean(org.setup)
+        setNeedsSetup(setup)
         setHasRecovery(Boolean(org.has_recovery_email))
         setOrgName(org.name || '')
-        if (org.username) setUsername(org.username)
+        // Only prefill username once the desk already exists (sign-in). Setup starts blank.
+        setUsername(setup ? '' : org.username || '')
         setReady(true)
       })
       .catch((err) => {
         if (cancelled) return
-        setError(err.message)
+        setLoadError(err.message || 'Could not reach the organization desk.')
         setNeedsSetup(false)
         setReady(true)
       })
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [reloadToken])
 
   async function submitLogin(event) {
     event.preventDefault()
     setBusy(true)
     setError('')
+    const user = username.trim()
+    const secret = password
     try {
       if (needsSetup) {
-        if (password !== confirm) {
+        if (secret !== confirm) {
           setError('Password and confirmation do not match.')
           setBusy(false)
           return
         }
-        const row = await setupOrg({ username, password, name: orgName, email })
+        if (secret.trim().length < 8) {
+          setError('Password must be at least 8 characters.')
+          setBusy(false)
+          return
+        }
+        const row = await setupOrg({
+          username: user,
+          password: secret,
+          name: orgName.trim(),
+          email: email.trim(),
+        })
         er.setOrgAuth(row)
       } else {
-        const row = await orgSession({ username, password })
+        const row = await orgSession({ username: user, password: secret })
         er.setOrgAuth(row)
       }
       navigate('/app')
@@ -135,7 +154,7 @@ export default function OrgSignIn() {
     setError('')
     setNotice('')
     try {
-      const result = await forgotOrgPassword({ username, email })
+      const result = await forgotOrgPassword({ username: username.trim(), email: email.trim() })
       setNotice(result.detail || 'A verification code was sent.')
       setStep('code')
     } catch (err) {
@@ -155,7 +174,12 @@ export default function OrgSignIn() {
         setBusy(false)
         return
       }
-      await resetOrgPassword({ username, email, code, password })
+      await resetOrgPassword({
+        username: username.trim(),
+        email: email.trim(),
+        code,
+        password,
+      })
       setPassword('')
       setConfirm('')
       setCode('')
@@ -178,6 +202,7 @@ export default function OrgSignIn() {
 
   const mode = needsSetup ? 'setup' : step
   const brand = BRAND[mode] || BRAND.login
+  const showForm = ready && !loadError && (needsSetup || step === 'login')
 
   return (
     <div className="org-login">
@@ -189,7 +214,19 @@ export default function OrgSignIn() {
       <div className="org-login-panel">
         <div className="org-login-card">
           {!ready ? <p className="pin-note">Loading…</p> : null}
-          {ready && (needsSetup || step === 'login') ? (
+          {ready && loadError ? (
+            <div className="org-login-form">
+              <p className="error-banner">{loadError}</p>
+              <button
+                type="button"
+                className="ghost-btn page-cta"
+                onClick={() => setReloadToken((n) => n + 1)}
+              >
+                Try again
+              </button>
+            </div>
+          ) : null}
+          {showForm ? (
             <form className="org-login-form" onSubmit={submitLogin}>
               {needsSetup ? (
                 <label>
@@ -199,6 +236,7 @@ export default function OrgSignIn() {
                     value={orgName}
                     onChange={(event) => setOrgName(event.target.value)}
                     autoComplete="organization"
+                    enterKeyHint="next"
                   />
                 </label>
               ) : null}
@@ -209,7 +247,10 @@ export default function OrgSignIn() {
                   minLength={3}
                   spellCheck={false}
                   autoCapitalize="none"
+                  autoCorrect="off"
                   autoComplete="username"
+                  enterKeyHint="next"
+                  inputMode="text"
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
                 />
@@ -221,6 +262,8 @@ export default function OrgSignIn() {
                     type="email"
                     required
                     autoComplete="email"
+                    inputMode="email"
+                    enterKeyHint="next"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                   />
@@ -257,10 +300,15 @@ export default function OrgSignIn() {
                 >
                   Forgot password?
                 </button>
-              ) : null}
+              ) : (
+                <p className="pin-note">
+                  After you create this login, later visits use Sign in with the same username and
+                  password.
+                </p>
+              )}
             </form>
           ) : null}
-          {ready && !needsSetup && step === 'forgot' ? (
+          {ready && !loadError && !needsSetup && step === 'forgot' ? (
             <form className="org-login-form" onSubmit={submitForgot}>
               {!hasRecovery ? (
                 <p className="pin-note">
@@ -275,6 +323,7 @@ export default function OrgSignIn() {
                   minLength={3}
                   spellCheck={false}
                   autoCapitalize="none"
+                  autoCorrect="off"
                   autoComplete="username"
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
@@ -286,6 +335,7 @@ export default function OrgSignIn() {
                   type="email"
                   required
                   autoComplete="email"
+                  inputMode="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   disabled={!hasRecovery}
@@ -307,7 +357,7 @@ export default function OrgSignIn() {
               </button>
             </form>
           ) : null}
-          {ready && !needsSetup && step === 'code' ? (
+          {ready && !loadError && !needsSetup && step === 'code' ? (
             <form className="org-login-form" onSubmit={submitReset}>
               {notice ? <p className="pin-note">{notice}</p> : null}
               <label>
@@ -316,6 +366,7 @@ export default function OrgSignIn() {
                   required
                   inputMode="numeric"
                   autoComplete="one-time-code"
+                  enterKeyHint="next"
                   maxLength={6}
                   pattern="[0-9]{6}"
                   value={code}
@@ -359,7 +410,7 @@ export default function OrgSignIn() {
               </button>
             </form>
           ) : null}
-          {ready && !needsSetup && step === 'done' ? (
+          {ready && !loadError && !needsSetup && step === 'done' ? (
             <div className="org-login-form">
               {notice ? <p className="pin-note">{notice}</p> : null}
               <button
