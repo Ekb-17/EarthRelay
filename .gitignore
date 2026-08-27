@@ -55,3 +55,7 @@ backend/data/cases/*
 tools/
 *.exe
 kernel.errors.txt
+_restored/
+
+# Gold-set photos are large; keep eval code + labels only
+backend/eval/photos/

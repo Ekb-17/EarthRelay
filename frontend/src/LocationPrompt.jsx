@@ -8,168 +8,218 @@ import {
   queryGeoPermission,
 } from './gps.js'
 
-const GEO_OPTS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+function movedEnough(prev, next) {
+  if (!prev) return true
+  const dlat = prev.lat - next.lat
+  const dlng = prev.lng - next.lng
+  return dlat * dlat + dlng * dlng > 0.00018 * 0.00018
+}
 
 export function useGpsGate({ onFix, autoCheck = true } = {}) {
   const onFixRef = useRef(onFix)
   onFixRef.current = onFix
   const dismissedRef = useRef(false)
+  const watchIdRef = useRef(null)
+  const lastFixRef = useRef(null)
   const [status, setStatus] = useState(IDLE_GPS)
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
 
-  const applyStatus = useCallback((next, { openPrompt = false } = {}) => {
+  const applyStatus = useCallback((next) => {
     setStatus(next)
-    if (next.kind === 'on') {
-      setOpen(false)
-      return
-    }
-    if (openPrompt && next.prompt && !dismissedRef.current) {
-      setOpen(true)
-    } else if (!next.prompt) {
-      setOpen(false)
+    setOpen(false)
+  }, [])
+
+  const stopWatch = useCallback(() => {
+    if (watchIdRef.current != null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(watchIdRef.current)
+      watchIdRef.current = null
     }
   }, [])
 
-  const readPosition = useCallback(
-    ({ openPromptOnFail = false, quiet = false } = {}) => {
-      const blocked = blockedGpsStatus()
-      if (blocked) {
-        applyStatus(blocked, { openPrompt: openPromptOnFail })
-        return
+  const startWatch = useCallback(() => {
+    if (!navigator.geolocation) {
+      applyStatus({
+        kind: 'blocked',
+        label: 'GPS is off',
+        hint: 'This browser cannot read location.',
+      })
+      return
+    }
+    const blocked = blockedGpsStatus()
+    if (blocked) {
+      applyStatus(blocked)
+      setOpen(true)
+      return
+    }
+    setBusy(true)
+    setStatus(ASKING_GPS)
+
+    const onFix = (pos) => {
+      setBusy(false)
+      dismissedRef.current = false
+      const next = classifyGeoSuccess(pos.coords)
+      applyStatus(next)
+      const fix = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        accuracy: pos.coords.accuracy,
       }
-      if (!quiet) {
-        setBusy(true)
-        setStatus(ASKING_GPS)
-      }
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setBusy(false)
-          dismissedRef.current = false
-          const next = classifyGeoSuccess(pos.coords)
-          applyStatus(next)
-          if (next.kind === 'on' || next.kind === 'broken') {
-            onFixRef.current?.({
-              lat: pos.coords.latitude,
-              lng: pos.coords.longitude,
-              accuracy: pos.coords.accuracy,
-            })
-          }
-        },
-        async (err) => {
-          setBusy(false)
-          const permission = await queryGeoPermission()
-          applyStatus(classifyGeoFailure(err, permission), {
-            openPrompt: openPromptOnFail,
-          })
-        },
-        GEO_OPTS,
-      )
-    },
-    [applyStatus],
-  )
+      lastFixRef.current = fix
+      onFixRef.current?.(fix)
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        onFix(pos)
+        if (watchIdRef.current != null) return
+        watchIdRef.current = navigator.geolocation.watchPosition(
+          (nextPos) => {
+            const fix = {
+              lat: nextPos.coords.latitude,
+              lng: nextPos.coords.longitude,
+              accuracy: nextPos.coords.accuracy,
+            }
+            applyStatus(classifyGeoSuccess(nextPos.coords))
+            if (movedEnough(lastFixRef.current, fix)) {
+              lastFixRef.current = fix
+              onFixRef.current?.(fix)
+            }
+          },
+          () => {},
+          { enableHighAccuracy: true, timeout: 30000, maximumAge: 5000 },
+        )
+      },
+      async (err) => {
+        setBusy(false)
+        const permission = await queryGeoPermission()
+        applyStatus(classifyGeoFailure(err, permission))
+        setOpen(true)
+        if (err?.code === 1 || permission === 'denied') {
+          stopWatch()
+        }
+      },
+      { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 },
+    )
+  }, [applyStatus, stopWatch])
 
   const request = useCallback(() => {
     dismissedRef.current = false
-    readPosition({ openPromptOnFail: true, quiet: false })
-  }, [readPosition])
+    stopWatch()
+    startWatch()
+  }, [startWatch, stopWatch])
 
   const onYes = useCallback(() => {
     dismissedRef.current = false
-    readPosition({ openPromptOnFail: true, quiet: false })
-  }, [readPosition])
+    request()
+  }, [request])
 
   const onNo = useCallback(() => {
     dismissedRef.current = true
+    stopWatch()
     setOpen(false)
-    setStatus((prev) =>
-      prev.kind === 'asking' || prev.kind === 'idle'
-        ? {
-            kind: 'off',
-            label: 'GPS is off',
-            hint: 'You chose No. Tap Use GPS when you want to turn it on.',
-            prompt: prev.prompt,
-          }
-        : prev,
-    )
-  }, [])
+    setStatus({
+      kind: 'off',
+      label: 'GPS is off',
+      hint: 'Location is off. Turn it on in your phone settings. Continue stays locked until GPS is on.',
+    })
+  }, [stopWatch])
 
   useEffect(() => {
     if (!autoCheck) return undefined
     let cancelled = false
     let permissionStatus = null
 
-    async function check() {
+    async function boot() {
       if (cancelled) return
       const blocked = blockedGpsStatus()
       if (blocked) {
-        applyStatus(blocked, { openPrompt: true })
+        applyStatus(blocked)
+        setOpen(true)
         return
       }
       const permission = await queryGeoPermission()
       if (cancelled) return
       if (permission === 'denied') {
-        applyStatus(classifyGeoFailure({ code: 1 }, permission), { openPrompt: true })
+        applyStatus(classifyGeoFailure({ code: 1 }, permission))
+        setOpen(true)
         return
       }
       if (permission === 'granted') {
-        readPosition({ openPromptOnFail: false, quiet: true })
+        startWatch()
         return
       }
-      applyStatus(
-        {
-          kind: 'off',
-          label: 'GPS is off',
-          hint: 'Location is not allowed yet. Tap Yes to turn it on.',
-          prompt: {
-            title: 'Turn on / allow location?',
-            body: 'Location is off or not allowed for EarthRelay. Turn on Location / GPS, then tap Yes. The next popup is the browser asking Allow.',
-          },
+      setStatus({
+        kind: 'idle',
+        label: 'GPS not checked yet',
+        hint: 'Tap Yes, then Allow. Phone Location must stay on.',
+        prompt: {
+          title: 'Use your location?',
+          body: 'Turn Location on, tap Yes, then press Allow in the browser. That is what reads GPS on a phone.',
         },
-        { openPrompt: true },
-      )
+      })
+      setOpen(true)
     }
 
-    check()
+    boot()
 
     function onVisible() {
-      if (document.visibilityState === 'visible') check()
+      if (document.visibilityState !== 'visible' || cancelled) return
+      if (watchIdRef.current == null) boot()
     }
     document.addEventListener('visibilitychange', onVisible)
 
-    queryGeoPermission().then(() => {
-      if (cancelled || !navigator.permissions?.query) return
+    if (navigator.permissions?.query) {
       navigator.permissions
         .query({ name: 'geolocation' })
         .then((statusObj) => {
+          if (cancelled) return
           permissionStatus = statusObj
           statusObj.onchange = () => {
-            if (!cancelled) check()
+            if (cancelled) return
+            stopWatch()
+            boot()
           }
         })
         .catch(() => {})
-    })
+    }
 
     return () => {
       cancelled = true
       document.removeEventListener('visibilitychange', onVisible)
       if (permissionStatus) permissionStatus.onchange = null
+      stopWatch()
     }
-  }, [autoCheck, applyStatus, readPosition])
+  }, [autoCheck, applyStatus, startWatch, stopWatch])
 
   return { status, open, busy, request, onYes, onNo }
 }
 
-export function GpsStatus({ gps }) {
+export function GpsStatus({ gps, compact = false }) {
   const { status, busy } = gps
   const kind = busy ? 'asking' : status.kind
   const label = busy ? ASKING_GPS.label : status.label
   const hint = busy ? ASKING_GPS.hint : status.hint
+  const showHint = Boolean(hint) && (!compact || kind === 'blocked')
   return (
     <div className={`gps-status gps-status-${kind}`} role="status">
       <strong>{label}</strong>
-      {hint && <span>{hint}</span>}
+      {showHint && <span>{hint}</span>}
     </div>
+  )
+}
+
+export function NearbyPlaces({ places }) {
+  if (!places?.length) return null
+  return (
+    <ul className="gps-nearby">
+      {places.map((item) => (
+        <li key={`${item.kind}-${item.name}-${item.distance_m}`}>
+          <strong>{item.kind}</strong> {item.name}
+          {item.distance_m != null ? <em> · {item.distance_m} m</em> : null}
+        </li>
+      ))}
+    </ul>
   )
 }
 

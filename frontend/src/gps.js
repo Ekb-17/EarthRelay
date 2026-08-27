@@ -52,13 +52,14 @@ export function blockedGpsStatus() {
     }
   }
   if (!window.isSecureContext) {
+    const httpsUrl = `https://${window.location.host}${window.location.pathname}`
     return {
       kind: 'blocked',
       label: 'GPS is blocked on this page',
-      hint: 'Open the https:// EarthRelay link. HTTP pages cannot use GPS.',
+      hint: `Open ${httpsUrl} — http pages cannot read phone GPS even when Location is on.`,
       prompt: {
         title: 'Location is blocked on this page',
-        body: 'Open the https:// EarthRelay link on your phone. Then we can ask to turn location on.',
+        body: `Phone Location being on is not enough. Open ${httpsUrl} (https, not http). If the browser warns about the certificate, tap Advanced, then Continue. After that, tap Yes and Allow.`,
       },
     }
   }
@@ -67,11 +68,11 @@ export function blockedGpsStatus() {
 
 export function classifyGeoSuccess(coords) {
   const meters = Math.round(coords?.accuracy || 0)
-  if (meters > 1000) {
+  if (meters > 2500) {
     return {
-      kind: 'broken',
-      label: 'GPS is on but not working',
-      hint: `Location is allowed, but this is only a network/Wi-Fi guess (±${meters} m), not a real GPS fix. Check your connection, turn Location on, or try outdoors.`,
+      kind: 'on',
+      label: 'GPS is on · coarse',
+      hint: `Allowed. This first pin is a wide guess (±${meters} m). Stay on the page a few seconds for a tighter fix.`,
     }
   }
   return {
@@ -100,11 +101,11 @@ export function classifyGeoFailure(err, permission) {
     if (permission === 'granted') {
       return {
         kind: 'broken',
-        label: 'GPS is on but not working',
+        label: 'GPS is not working',
         hint:
           code === 3
             ? 'Location is allowed, but the fix timed out. Check network, wait outdoors, then tap Use GPS again.'
-            : 'Location is allowed, but the phone could not get a fix. Check network, GPS signal, or try outdoors.',
+            : 'Location is allowed, but no fix yet. Check network, GPS signal, or try outdoors.',
       }
     }
     return {

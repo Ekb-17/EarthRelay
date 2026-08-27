@@ -1,0 +1,102 @@
+[
+  {
+    "id": "green-valley",
+    "name": "Green Valley Volunteers",
+    "email": "greenvalley@example.org",
+    "role": "field_volunteer",
+    "kind": "group",
+    "status": "active",
+    "organization": "Green Valley Volunteers",
+    "capabilities": [
+      "cleanup",
+      "field_assessment"
+    ],
+    "access": {
+      "assigned_only": true,
+      "photos": true,
+      "location": true,
+      "contact_citizen": false
+    },
+    "phone": "03001110001"
+  },
+  {
+    "id": "cleanup-team",
+    "name": "Community Cleanup Team",
+    "email": "cleanup@example.org",
+    "role": "field_volunteer",
+    "kind": "group",
+    "status": "active",
+    "organization": "Community Cleanup Team",
+    "capabilities": [
+      "cleanup",
+      "supplies"
+    ],
+    "access": {
+      "assigned_only": true,
+      "photos": true,
+      "location": true,
+      "contact_citizen": false
+    },
+    "phone": "03001110002"
+  },
+  {
+    "id": "sarah",
+    "name": "Sarah \u2014 Field Volunteer",
+    "email": "sarah@example.org",
+    "role": "field_volunteer",
+    "kind": "person",
+    "status": "active",
+    "organization": "",
+    "capabilities": [
+      "field_assessment",
+      "documentation"
+    ],
+    "access": {
+      "assigned_only": true,
+      "photos": true,
+      "location": true,
+      "contact_citizen": false
+    },
+    "phone": "03001110003"
+  },
+  {
+    "id": "local-relief",
+    "name": "Local Relief Group",
+    "email": "relief@example.org",
+    "role": "field_volunteer",
+    "kind": "group",
+    "status": "active",
+    "organization": "Local Relief Group",
+    "capabilities": [
+      "supplies",
+      "community"
+    ],
+    "access": {
+      "assigned_only": true,
+      "photos": true,
+      "location": true,
+      "contact_citizen": false
+    },
+    "phone": "03001110004"
+  },
+  {
+    "id": "alex-pending",
+    "name": "Alex Rivera",
+    "email": "alex@example.org",
+    "role": "field_volunteer",
+    "kind": "person",
+    "status": "pending",
+    "organization": "",
+    "capabilities": [
+      "cleanup",
+      "field_assessment"
+    ],
+    "access": {
+      "assigned_only": true,
+      "photos": true,
+      "location": true,
+      "contact_citizen": false
+    },
+    "phone": "03001110005"
+  }
+]

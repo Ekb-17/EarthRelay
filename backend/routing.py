@@ -125,6 +125,8 @@ def route_for(incident_type: str | None) -> dict:
 
 
 def enrich_case(case: dict) -> dict:
+    from cases import _is_demo_case
+
     routed = route_for(case.get("incident_type"))
     team_id = normalize_team(case.get("routed_to") or case.get("assigned_team") or routed["id"])
     team = TEAMS.get(team_id) or TEAMS["earthrelay-org"]
@@ -134,6 +136,8 @@ def enrich_case(case: dict) -> dict:
     case.setdefault("phone_notice", PHONE_NOTICE)
     case.setdefault("claimed_by", "")
     case.setdefault("address", "")
+    if _is_demo_case(case):
+        case["demo"] = True
     return case
 
 
