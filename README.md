@@ -118,22 +118,57 @@ See [backend/README.md](backend/README.md) and [frontend/README.md](frontend/REA
 | Written description | This README |
 | Attribution | [ATTRIBUTION.md](ATTRIBUTION.md) |
 
-## Tech stack
+## Frameworks
 
-| Layer | Choice |
+Application structure and libraries the product is built on:
+
+| Framework | Role |
 |---|---|
-| API | FastAPI, Uvicorn |
-| Detection / vision | Ultralytics YOLO11n on CPU; Google Gemini (when configured) for scene / severity |
-| Cases | Local JSON store (`backend/data/cases/`); optional cloud sync when configured |
-| Auth desks | Organization, staff, and volunteer sessions (passwords hashed; org setup on first visit) |
-| Frontend | React, Vite, React Router, Mapbox GL |
-| Map (no token) | OpenFreeMap liberty style |
-| Weather / AQI | Open-Meteo |
-| Hazards | USGS earthquakes, NOAA NCEI tsunamis, NASA EONET + GDACS floods |
-| Satellite tiles | NASA GIBS |
-| Places / address | Komoot Photon, OpenStreetMap Nominatim |
-| Wildlife / protected | GBIF, Natural Earth / UNESCO (cached GeoJSON) |
-| Email (optional) | SMTP for invites and password-reset codes |
+| FastAPI | Backend HTTP API and service layer |
+| React | Citizen, organization, staff, and volunteer interfaces |
+| React Router | Client-side navigation across roles and case flows |
+| Ultralytics YOLO | On-device / CPU object detection for field photos |
+| Mapbox GL JS | Interactive map rendering and layer controls |
+
+## Technologies
+
+Languages, platforms, and technical capabilities used in the system:
+
+| Technology | Role |
+|---|---|
+| Python | Backend services, detection pipeline, case logic |
+| JavaScript (ES modules) | Frontend application code |
+| CSS | Interface layout and styling |
+| Docker | Production container image for API + built UI |
+| REST APIs | Client–server communication |
+| Computer vision / AI | YOLO detections; Google Gemini for scene and severity support when configured |
+| GPS / browser geolocation | Live incident pinning for citizens and field context |
+| GeoJSON map layers | Hazards, wildlife, and protected-area context on the workspace map |
+| JSON case store | Local case persistence (`backend/data/cases/`), with optional cloud sync when configured |
+
+## Tools
+
+Build, run, host, and operate the project:
+
+| Tool | Role |
+|---|---|
+| Vite | Frontend bundling and local development server |
+| Uvicorn | ASGI server for the FastAPI app |
+| npm | Frontend dependency management |
+| pip / Python venv | Backend dependency management |
+| GitHub | Source control and collaboration |
+| Railway | Hosted production deployment and public demo URL |
+| OpenFreeMap | Default street basemap when no Mapbox token is set |
+| Open-Meteo | Weather and air-quality context |
+| USGS / NOAA / NASA EONET + GDACS | Earthquake, tsunami, and flood hazard feeds |
+| Komoot Photon + OpenStreetMap Nominatim | Place search and reverse geocoding |
+| GBIF, Natural Earth, UNESCO caches | Wildlife and protected-area reference layers |
+| NASA GIBS | Optional satellite imagery overlay |
+| SMTP (e.g. Gmail app password) | Optional email for invites and password-reset codes |
+| Google Gemini API | Optional higher-quality scene / severity assistance |
+| Mapbox account / token | Optional Mapbox streets and satellite styles |
+
+Secrets stay in local `.env` or Railway Variables — never in the repository. See [ATTRIBUTION.md](ATTRIBUTION.md) for third-party terms.
 
 ## License
 
