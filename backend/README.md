@@ -1,6 +1,6 @@
 # EarthRelay backend
 
-FastAPI service for case intake, CPU detection, map layers, and the NGO inbox.
+FastAPI service for case intake, vision/investigation, map layers, and desks for **organization**, **staff**, and **volunteers**.
 
 ## Run
 
@@ -22,34 +22,35 @@ If `frontend/dist` exists, the same process also serves the web app at `/`.
 |---|---|
 | `main.py` | HTTP routes, uploads, SPA fallback |
 | `detect.py` | YOLO CPU detection + annotated JPEG |
+| `report.py` | Severity, narrative, Gemini scene help when configured |
 | `cases.py` | Local JSON case store |
-| `routing.py` | Auto-forward to fire / org / water / wildlife desks |
-| `report.py` | Severity, narrative, weather notes |
+| `routing.py` | Auto-forward to response desks |
+| `volunteers.py` | Volunteer join / sign-in / org setup + recovery |
+| `staff.py` | Staff IDs and sessions |
+| `field.py` | Volunteer field-task copy and access |
+| `mail.py` | Optional SMTP invites / reset codes |
 | `places.py` | Place search + reverse geocode (street address) |
 | `hazards.py` | Earthquakes, tsunamis, floods |
 | `layers.py` | Weather, AQI, satellite, wildlife, protected areas |
-| `download_layers.py` | Refresh cached GeoJSON under `data/` |
-| `earth_engine.py` | Optional Earth Engine smoke test (not required) |
+| `phone.py` | Phone notice helpers |
+| `cloud.py` | Optional cloud case sync when configured |
 
 ## Data directory
 
 ```
 backend/data/
-  cases/       submitted cases (gitignored)
-  uploads/     original + annotated photos (gitignored)
-  *.geojson    cached public map layers (committed; refresh with download_layers.py)
-```
-
-Refresh layers:
-
-```bash
-python backend/download_layers.py
+  cases/           submitted cases (gitignored)
+  uploads/         original + annotated photos (gitignored)
+  org.json         organization login (gitignored — created on first setup)
+  volunteers.json  volunteer records (local)
+  staff.json       staff IDs (local)
+  *.geojson        cached public map layers
 ```
 
 ## Detection
 
-Uses Ultralytics YOLO11n on CPU. Place `yolo11n.pt` at the repo root, or let Ultralytics download it on first run. Weights are gitignored.
+Uses Ultralytics YOLO11n on CPU. Optional Google Gemini improves scene / severity when API keys are set. Weights and secrets are not committed.
 
 ## Environment
 
-Copy `.env.example` to `.env` at the repo root. Nothing is required for a working demo. `VITE_MAPBOX_TOKEN` is only read by the frontend build.
+Copy `.env.example` to `.env` at the repo root. Nothing is required for a basic demo. Optional: SMTP, Mapbox (`VITE_MAPBOX_TOKEN` for frontend build), Gemini keys.

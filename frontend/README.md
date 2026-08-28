@@ -1,6 +1,6 @@
 # EarthRelay frontend
 
-React UI for filing cases, the hazard map, GPS, and the NGO inbox.
+React UI for citizens, organization desks, staff, and volunteers.
 
 ## Run
 
@@ -17,19 +17,36 @@ Production build (also used by the Docker image):
 npm run build
 ```
 
+## Main routes
+
+| Path | Role |
+|---|---|
+| `/` | Citizen landing |
+| `/who` → `/confirm` | Citizen report flow |
+| `/community` | Volunteer landing / join / sign-in / tasks |
+| `/app/signin` | Organization setup or sign-in |
+| `/app` | Organization cases inbox + map |
+| `/staff/signin` | Staff ID sign-in |
+
 ## Layout
 
 | File | Role |
 |---|---|
 | `src/App.jsx` | Routes |
-| `src/pages.jsx` | Landing, role pick, case details, contact |
-| `src/Workspace.jsx` | File-a-report (citizen) and NGO inbox |
-| `src/CaseReport.jsx` | Full case packet + take / call / dispatch |
+| `src/pages.jsx` | Landing, help/about, case contact screens |
+| `src/WhoYouAre.jsx` | Citizen report form + GPS gate |
+| `src/FlowPages.jsx` | Safety, confirm, dispatch brief, activity |
+| `src/Workspace.jsx` | Organization cases inbox + hazard map |
+| `src/Community.jsx` | Volunteer community and field tasks |
+| `src/OrgAuth.jsx` | Organization create-login / sign-in / reset |
+| `src/OrgPages.jsx` / `OrgShell.jsx` | Org settings, invites, staff IDs, etc. |
+| `src/Staff.jsx` | Staff desk |
+| `src/CaseReport.jsx` | Case packet UI |
 | `src/HazardMap.jsx` | Mapbox GL map + layers |
-| `src/LocationPrompt.jsx` | Location on / off / not-working prompt |
-| `src/routing.js` | Client copy of auto-forward rules |
-| `src/gps.js` | Geolocation status helpers |
+| `src/LocationPrompt.jsx` | Location allow / deny / retry |
+| `src/routing.js` | Client routing / status labels |
+| `src/gps.js` | Geolocation helpers |
 
 ## Map
 
-Without `VITE_MAPBOX_TOKEN`, streets come from OpenFreeMap. Set the token in the **repo-root** `.env` (Vite `envDir` is the parent folder).
+Without `VITE_MAPBOX_TOKEN`, streets come from OpenFreeMap. Set optional tokens in the **repo-root** `.env` (Vite `envDir` is the parent folder). Never commit secrets.
