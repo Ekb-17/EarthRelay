@@ -2328,6 +2328,14 @@ a.ghost-btn {
   margin: 0;
 }
 
+.staff-shell-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .staff-id-chip {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   letter-spacing: 0.04em;

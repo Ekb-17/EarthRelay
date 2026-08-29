@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useEarthRelay } from './context.jsx'
@@ -124,14 +124,14 @@ function signOutStaff(er, navigate) {
 }
 
 export function formatPay(amount) {
-  return `PKR ${Number(amount || 0).toLocaleString()}`
+  return `$${Number(amount || 0).toLocaleString()}`
 }
 
 export function staffGross(person) {
   return (
-    Number(person?.salary_pkr || 0) +
-    Number(person?.transport_allowance_pkr || 0) +
-    Number(person?.medical_allowance_pkr || 0)
+    Number(person?.salary_usd || 0) +
+    Number(person?.transport_allowance_usd || 0) +
+    Number(person?.medical_allowance_usd || 0)
   )
 }
 
@@ -148,7 +148,7 @@ function masked(last4) {
 }
 
 function recentPayslips(person) {
-  const gross = person?.gross_pkr || staffGross(person)
+  const gross = person?.gross_usd || staffGross(person)
   const now = new Date()
   const rows = []
   for (let offset = 1; offset <= 3; offset += 1) {
@@ -317,10 +317,10 @@ export function StaffRecordCards({ person, heading = '' }) {
         <section className="staff-card">
           <h2>Pay</h2>
           <dl className="staff-dl">
-            <Field label="Basic salary">{formatPay(person.salary_pkr)} / month</Field>
-            <Field label="Transport allowance">{formatPay(person.transport_allowance_pkr)}</Field>
-            <Field label="Medical allowance">{formatPay(person.medical_allowance_pkr)}</Field>
-            <Field label="Gross this month">{formatPay(person.gross_pkr || staffGross(person))}</Field>
+            <Field label="Basic salary">{formatPay(person.salary_usd)} / month</Field>
+            <Field label="Transport allowance">{formatPay(person.transport_allowance_usd)}</Field>
+            <Field label="Medical allowance">{formatPay(person.medical_allowance_usd)}</Field>
+            <Field label="Gross this month">{formatPay(person.gross_usd || staffGross(person))}</Field>
             <Field label="Pay cycle">{person.pay_cycle || 'monthly'}</Field>
             <Field label="Bank account">{masked(person.bank_last4)}</Field>
           </dl>
@@ -418,7 +418,8 @@ export function StaffSignInPage() {
     try {
       const row = await staffSession(cmsId, secret)
       er.setStaff(row)
-      navigate('/staff', { replace: true })
+      // Keep sign-in in history so browser Back stays in EarthRelay, not Chrome/Google.
+      navigate('/staff')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -427,7 +428,7 @@ export function StaffSignInPage() {
   }
 
   if (er.role === 'staff' && er.staff) {
-    return <Navigate to="/staff" replace />
+    return <Navigate to="/staff" />
   }
 
   return (
@@ -486,6 +487,17 @@ export function StaffHome() {
   const navigate = useNavigate()
   const [copied, setCopied] = useState(false)
 
+  useEffect(() => {
+    if (er.role !== 'staff' || !er.staff) return undefined
+    // Extra history entry so Back opens staff sign-in instead of leaving the site.
+    window.history.pushState({ erStaffGuard: true }, '')
+    const onPop = () => {
+      navigate('/staff/signin', { replace: true })
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [er.role, er.staff, navigate])
+
   if (er.role !== 'staff' || !er.staff) {
     return <Navigate to="/staff/signin" replace />
   }
@@ -524,9 +536,22 @@ export function StaffHome() {
             </button>
           </p>
         </div>
-        <button type="button" className="ghost-btn" onClick={() => signOutStaff(er, navigate)}>
-          {sessionStorage.getItem('er-staff-from-org') ? 'Back to Staff IDs' : 'Sign out'}
-        </button>
+        <div className="staff-shell-actions">
+          {fromOrg ? (
+            <button type="button" className="ghost-btn" onClick={() => signOutStaff(er, navigate)}>
+              Back to Staff IDs
+            </button>
+          ) : (
+            <>
+              <Link className="ghost-btn" to="/">
+                Home
+              </Link>
+              <button type="button" className="ghost-btn" onClick={() => signOutStaff(er, navigate)}>
+                Sign out
+              </button>
+            </>
+          )}
+        </div>
       </header>
       <StaffRecordCards person={person} />
     </div>

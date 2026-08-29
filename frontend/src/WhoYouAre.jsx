@@ -83,7 +83,9 @@ export default function WhoYouAre() {
   }, [er.file])
 
   useEffect(() => {
-    // chooseRole('citizen') clears any leftover pin from a prior demo on this tab.
+    // Fresh report form: drop any leftover pin from a prior demo, then let GPS refill.
+    er.setPin(null)
+    er.setPlaceTarget(null)
     er.chooseRole('citizen')
   }, [])
 
@@ -109,7 +111,7 @@ export default function WhoYouAre() {
     if (missing.length || !gpsIsOn(gps) || !hasPin(er.pin)) return
 
     er.setIdentity({ first: first.trim(), last: last.trim(), phone: phone.trim(), role: 'citizen' })
-    er.chooseRole('citizen')
+    // Do not call chooseRole here — that used to clear the GPS pin before Confirm.
     navigate(needsSafety(er.incidentType) ? '/safety' : '/confirm')
   }
 

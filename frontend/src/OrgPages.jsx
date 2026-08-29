@@ -405,7 +405,7 @@ export function StaffPage() {
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('case_officer')
   const [desk, setDesk] = useState('general')
-  const [salary, setSalary] = useState('80000')
+  const [salary, setSalary] = useState('285')
   const [password, setPassword] = useState('')
   const [resetPassword, setResetPassword] = useState('')
   const trash = useTimedDelete(async (item) => {
@@ -441,7 +441,7 @@ export function StaffPage() {
         email,
         role,
         desk,
-        salary_pkr: Number(salary) || 0,
+        salary_usd: Number(salary) || 0,
         password,
       })
       setMessage(
@@ -547,7 +547,7 @@ export function StaffPage() {
             </select>
           </label>
           <label>
-            Monthly salary (PKR)
+            Monthly salary (USD)
             <input
               type="number"
               min="0"

@@ -612,7 +612,7 @@ class StaffAllotIn(BaseModel):
     email: str = ""
     role: str = "case_officer"
     desk: str = "general"
-    salary_pkr: int = 80000
+    salary_usd: int = 285
     password: str = ""
     cms_id: str = ""
     joined_on: str = ""

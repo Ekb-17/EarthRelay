@@ -268,6 +268,7 @@ export function EarthRelayProvider({ children }) {
   })
 
   function chooseRole(next) {
+    const prev = sessionStorage.getItem('er-role') || role
     setRole(next)
     sessionStorage.setItem('er-role', next)
     if (next !== 'volunteer') {
@@ -281,8 +282,9 @@ export function EarthRelayProvider({ children }) {
     if (next === 'citizen' || next === 'volunteer') {
       setOrgAuthState(null)
     }
-    // Judges / next visitors must not inherit the previous tester's map pin.
-    if (next === 'citizen') {
+    // Clear pin only when entering citizen from another role — not on every
+    // chooseRole('citizen') call (Continue used to wipe the GPS fix).
+    if (next === 'citizen' && prev !== 'citizen') {
       setPin(null)
       setPlaceTarget(null)
     }

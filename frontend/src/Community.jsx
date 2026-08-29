@@ -550,14 +550,24 @@ export function CommunitySignIn() {
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
 
+  // Never skip the password form because of a leftover sessionStorage login —
+  // that looked like “wrong email/password still worked” in demos.
+  useEffect(() => {
+    if (er.volunteer || er.role === 'volunteer') {
+      er.setVolunteer(null)
+      er.chooseRole('citizen')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on entering sign-in
+  }, [])
+
   function readForm(event) {
     const data = new FormData(event.currentTarget)
     const nextEmail = String(data.has('email') ? data.get('email') : email || '')
       .trim()
       .toLowerCase()
     const nextPhone = String(data.has('phone') ? data.get('phone') : phone || '').trim()
-    const nextPassword = passwordFromForm(data, 'volunteer_password', 'password')
-    const nextConfirm = passwordFromForm(data, 'volunteer_password_confirm', 'confirm')
+    const nextPassword = passwordFromForm(data, 'volunteer_password', 'password') || password
+    const nextConfirm = passwordFromForm(data, 'volunteer_password_confirm', 'confirm') || confirm
     const nextCode = String(data.has('code') ? data.get('code') : code || '').trim()
     setEmail(nextEmail)
     setPhone(nextPhone)
@@ -594,47 +604,30 @@ export function CommunitySignIn() {
         setNotice('Password updated. Sign in with the new password.')
         return
       }
-      if (nextPassword.length < 8) {
+      if (!nextEmail || !nextPhone || nextPassword.length < 8) {
         setError('Email or password is incorrect.')
         setBusy(false)
         return
       }
+      // Drop any cached volunteer before the API check so a failed attempt cannot keep access.
       er.setVolunteer(null)
       const row = await volunteerSession(nextEmail, nextPassword, nextPhone)
-      if (!row?.id) {
+      if (!row?.id || !row?.email) {
+        throw new Error('Email or password is incorrect.')
+      }
+      // Signed-in email must match what they typed (defense in depth).
+      if (String(row.email).trim().toLowerCase() !== nextEmail) {
         throw new Error('Email or password is incorrect.')
       }
       er.setVolunteer(row)
+      setPassword('')
       navigate('/community/tasks')
     } catch (err) {
-      setError(err.message)
+      er.setVolunteer(null)
+      setError(err.message || 'Email or password is incorrect.')
     } finally {
       setBusy(false)
     }
-  }
-
-  if (er.role === 'volunteer' && er.volunteer) {
-    return (
-      <div className="page-scroll org-page">
-        <div className="org-page-body org-form">
-          <p className="kicker">Community Response</p>
-          <h1>Sign in</h1>
-          <p className="pin-note">
-            You are signed in as {er.volunteer.name} ({er.volunteer.email}). Sign out to use a
-            different email.
-          </p>
-          <Link className="ghost-btn page-cta" to="/community/tasks">
-            Continue to field tasks
-          </Link>
-          <button type="button" className="ghost-btn" onClick={() => signOutVolunteer(er, navigate)}>
-            Sign out
-          </button>
-          <Link className="pin-note" to="/community">
-            Back
-          </Link>
-        </div>
-      </div>
-    )
   }
 
   const forgetting = mode === 'forgot'
@@ -644,11 +637,11 @@ export function CommunitySignIn() {
     ? 'Enter the 6-digit code from your email, then choose a new password.'
     : forgetting
       ? 'Confirm the email and phone on your account. If email delivery is set up, we send a code so you can choose a new password. Otherwise ask the organization desk to set a temporary password on Volunteers — you sign in with that, then choose your own.'
-      : 'Use your EarthRelay email, phone, and password — not the password for your email inbox.'
+      : 'Use your EarthRelay email, phone, and password — not the password for your email inbox. Wrong details are rejected.'
 
   return (
     <div className="page-scroll org-page">
-      <form className="org-page-body org-form" onSubmit={submit}>
+      <form className="org-page-body org-form" autoComplete="off" onSubmit={submit}>
         <p className="kicker">Community Response</p>
         <h1>{title}</h1>
         <p className="pin-note">{copy}</p>
@@ -658,7 +651,7 @@ export function CommunitySignIn() {
             type="email"
             name="email"
             required
-            autoComplete="email"
+            autoComplete="off"
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
@@ -673,7 +666,7 @@ export function CommunitySignIn() {
             name="phone"
             required
             inputMode="tel"
-            autoComplete="tel"
+            autoComplete="off"
             placeholder="+92… or 03… or any country"
             value={phone}
             onChange={(event) => setPhone(event.target.value)}

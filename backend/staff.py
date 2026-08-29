@@ -69,9 +69,9 @@ SEED_PEOPLE = [
         "role": "case_officer",
         "desk": "flood",
         "joined_on": "2024-03-01",
-        "salary_pkr": 85000,
-        "transport_allowance_pkr": 8000,
-        "medical_allowance_pkr": 4000,
+        "salary_usd": 300,
+        "transport_allowance_usd": 30,
+        "medical_allowance_usd": 15,
         "leave_balance_days": 18,
         "reports_to": "Zainab Hussain",
         "cnic_last4": "4521",
@@ -87,9 +87,9 @@ SEED_PEOPLE = [
         "role": "desk_lead",
         "desk": "sewage",
         "joined_on": "2023-11-12",
-        "salary_pkr": 110000,
-        "transport_allowance_pkr": 10000,
-        "medical_allowance_pkr": 6000,
+        "salary_usd": 390,
+        "transport_allowance_usd": 35,
+        "medical_allowance_usd": 20,
         "leave_balance_days": 12,
         "reports_to": "Zainab Hussain",
         "cnic_last4": "8830",
@@ -105,9 +105,9 @@ SEED_PEOPLE = [
         "role": "dispatcher",
         "desk": "fire",
         "joined_on": "2024-01-08",
-        "salary_pkr": 92000,
-        "transport_allowance_pkr": 8000,
-        "medical_allowance_pkr": 4000,
+        "salary_usd": 330,
+        "transport_allowance_usd": 30,
+        "medical_allowance_usd": 15,
         "leave_balance_days": 15,
         "reports_to": "Zainab Hussain",
         "cnic_last4": "1194",
@@ -123,9 +123,9 @@ SEED_PEOPLE = [
         "role": "field_coordinator",
         "desk": "wildlife",
         "joined_on": "2023-08-20",
-        "salary_pkr": 98000,
-        "transport_allowance_pkr": 12000,
-        "medical_allowance_pkr": 5000,
+        "salary_usd": 350,
+        "transport_allowance_usd": 45,
+        "medical_allowance_usd": 20,
         "leave_balance_days": 9,
         "reports_to": "Zainab Hussain",
         "cnic_last4": "6722",
@@ -141,9 +141,9 @@ SEED_PEOPLE = [
         "role": "case_officer",
         "desk": "deforestation",
         "joined_on": "2024-06-15",
-        "salary_pkr": 85000,
-        "transport_allowance_pkr": 8000,
-        "medical_allowance_pkr": 4000,
+        "salary_usd": 300,
+        "transport_allowance_usd": 30,
+        "medical_allowance_usd": 15,
         "leave_balance_days": 20,
         "reports_to": "Zainab Hussain",
         "cnic_last4": "3048",
@@ -159,9 +159,9 @@ SEED_PEOPLE = [
         "role": "desk_lead",
         "desk": "earthquake",
         "joined_on": "2023-05-02",
-        "salary_pkr": 110000,
-        "transport_allowance_pkr": 10000,
-        "medical_allowance_pkr": 6000,
+        "salary_usd": 390,
+        "transport_allowance_usd": 35,
+        "medical_allowance_usd": 20,
         "leave_balance_days": 11,
         "reports_to": "Zainab Hussain",
         "cnic_last4": "5571",
@@ -177,9 +177,9 @@ SEED_PEOPLE = [
         "role": "case_officer",
         "desk": "dumping",
         "joined_on": "2024-09-01",
-        "salary_pkr": 85000,
-        "transport_allowance_pkr": 8000,
-        "medical_allowance_pkr": 4000,
+        "salary_usd": 300,
+        "transport_allowance_usd": 30,
+        "medical_allowance_usd": 15,
         "leave_balance_days": 16,
         "reports_to": "Zainab Hussain",
         "cnic_last4": "9012",
@@ -195,9 +195,9 @@ SEED_PEOPLE = [
         "role": "admin",
         "desk": "general",
         "joined_on": "2022-02-14",
-        "salary_pkr": 140000,
-        "transport_allowance_pkr": 12000,
-        "medical_allowance_pkr": 8000,
+        "salary_usd": 500,
+        "transport_allowance_usd": 45,
+        "medical_allowance_usd": 30,
         "leave_balance_days": 7,
         "reports_to": "Operations board",
         "cnic_last4": "2286",
@@ -209,10 +209,13 @@ SEED_PEOPLE = [
 
 SEED_HR = {row["cms_id"]: row for row in SEED_PEOPLE}
 
+# Approximate PKR→USD for migrating older staff records that still store *_pkr.
+_PKR_PER_USD = 280
+
 HR_INT_KEYS = (
-    "salary_pkr",
-    "transport_allowance_pkr",
-    "medical_allowance_pkr",
+    "salary_usd",
+    "transport_allowance_usd",
+    "medical_allowance_usd",
     "leave_balance_days",
 )
 
@@ -224,9 +227,25 @@ def _as_int(value, fallback=0) -> int:
         return fallback
 
 
+def _migrate_pay_currency(row: dict) -> dict:
+    """Rename legacy *_pkr pay fields to USD and drop obsolete gross_pkr."""
+    for old, new in (
+        ("salary_pkr", "salary_usd"),
+        ("transport_allowance_pkr", "transport_allowance_usd"),
+        ("medical_allowance_pkr", "medical_allowance_usd"),
+    ):
+        if old in row:
+            if new not in row:
+                row[new] = max(0, round(_as_int(row.get(old), 0) / _PKR_PER_USD))
+            row.pop(old, None)
+    row.pop("gross_pkr", None)
+    return row
+
+
 def _employment_defaults(row: dict) -> dict:
     phone = normalize_phone(row.get("phone") or "")
     role = row.get("role") or "case_officer"
+    _migrate_pay_currency(row)
     row.setdefault("status", "active")
     row.setdefault("pay_cycle", "monthly")
     row.setdefault("employment_type", "full_time")
@@ -237,9 +256,9 @@ def _employment_defaults(row: dict) -> dict:
     row.setdefault("cnic_last4", phone[-4:] if len(phone) >= 4 else "")
     row.setdefault("emergency_phone", "")
     row.setdefault("bank_last4", phone[-4:] if len(phone) >= 4 else "")
-    row.setdefault("salary_pkr", 80000)
-    row.setdefault("transport_allowance_pkr", 5000)
-    row.setdefault("medical_allowance_pkr", 3000)
+    row.setdefault("salary_usd", 285)
+    row.setdefault("transport_allowance_usd", 20)
+    row.setdefault("medical_allowance_usd", 10)
     row.setdefault("leave_balance_days", 14)
     for key in HR_INT_KEYS:
         row[key] = _as_int(row.get(key), 0)
@@ -321,7 +340,7 @@ def public_staff(row: dict | None) -> dict | None:
     out["grade"] = row.get("grade") or GRADE_FROM_ROLE.get(row.get("role") or "", out["role_label"])
     for key in HR_INT_KEYS:
         out[key] = _as_int(row.get(key), 0)
-    out["gross_pkr"] = out["salary_pkr"] + out["transport_allowance_pkr"] + out["medical_allowance_pkr"]
+    out["gross_usd"] = out["salary_usd"] + out["transport_allowance_usd"] + out["medical_allowance_usd"]
     return out
 
 
@@ -392,7 +411,13 @@ def allot_staff(fields: dict) -> dict:
     email = str(fields.get("email") or "").strip().lower()
     role = fields.get("role") if fields.get("role") in ROLES else "case_officer"
     desk = fields.get("desk") if fields.get("desk") in DESKS else "general"
-    salary = _as_int(fields.get("salary_pkr"), 0)
+    # Accept salary_usd; still accept legacy salary_pkr from older clients.
+    if "salary_usd" in fields:
+        salary = _as_int(fields.get("salary_usd"), 0)
+    elif "salary_pkr" in fields:
+        salary = max(0, round(_as_int(fields.get("salary_pkr"), 0) / _PKR_PER_USD))
+    else:
+        salary = 0
     if salary < 0:
         raise ValueError("Salary cannot be negative.")
     rows = load_staff()
@@ -401,8 +426,18 @@ def allot_staff(fields: dict) -> dict:
         raise ValueError("Staff ID cannot be an email address.")
     if find_by_cms(cms_id):
         raise ValueError(f"Staff ID {cms_id} is already allotted.")
-    transport = _as_int(fields.get("transport_allowance_pkr"), 5000)
-    medical = _as_int(fields.get("medical_allowance_pkr"), 3000)
+    if "transport_allowance_usd" in fields:
+        transport = _as_int(fields.get("transport_allowance_usd"), 20)
+    elif "transport_allowance_pkr" in fields:
+        transport = max(0, round(_as_int(fields.get("transport_allowance_pkr"), 0) / _PKR_PER_USD))
+    else:
+        transport = 20
+    if "medical_allowance_usd" in fields:
+        medical = _as_int(fields.get("medical_allowance_usd"), 10)
+    elif "medical_allowance_pkr" in fields:
+        medical = max(0, round(_as_int(fields.get("medical_allowance_pkr"), 0) / _PKR_PER_USD))
+    else:
+        medical = 10
     row = _employment_defaults(
         {
             "id": cms_id.lower().replace("-", ""),
@@ -415,9 +450,9 @@ def allot_staff(fields: dict) -> dict:
             "status": "active",
             "password_hash": hash_password(password),
             "must_change_password": True,
-            "salary_pkr": salary or 80000,
-            "transport_allowance_pkr": transport,
-            "medical_allowance_pkr": medical,
+            "salary_usd": salary or 285,
+            "transport_allowance_usd": transport,
+            "medical_allowance_usd": medical,
             "pay_cycle": "monthly",
             "joined_on": str(fields.get("joined_on") or utc_now()[:10]),
             "employment_type": "full_time",
