@@ -111,7 +111,7 @@ See [backend/README.md](backend/README.md) and [frontend/README.md](frontend/REA
 
 | Requirement | Where it is |
 |---|---|
-| Working demo | https://earthrelay-production.up.railway.app (or a screen recording) |
+| Working demo | Live app: https://earthrelay-production.up.railway.app — and a screen recording (provided with this submission) |
 | Public source repo | This GitHub repository |
 | Written description | This README |
 | Attribution | [ATTRIBUTION.md](ATTRIBUTION.md) |
