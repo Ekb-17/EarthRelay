@@ -20,12 +20,12 @@ EarthRelay closes that gap: one case file that links **detection** (what the pho
 
 ### Four roles, one app
 
-| Who | What they do | Entry |
+| Who | What they do | Live link |
 |---|---|---|
-| **Citizen** | Report with photo + live GPS; get a case alert | `/` → Get started |
-| **Organization** | Inbox, assign response, invite volunteers, staff IDs, settings | `/app/signin` |
-| **Staff** | Desk work with Staff ID | `/staff/signin` |
-| **Volunteer** | Join / sign in; accept field tasks (map pin + street address, not citizen phone/name) | `/community` |
+| **Citizen** | Report with photo + live GPS; get a case alert | [https://earthrelay-production.up.railway.app/](https://earthrelay-production.up.railway.app/) |
+| **Organization** | Inbox, assign response, invite volunteers, staff IDs, settings | [https://earthrelay-production.up.railway.app/app/signin](https://earthrelay-production.up.railway.app/app/signin) |
+| **Staff** | Desk work with Staff ID | [https://earthrelay-production.up.railway.app/staff/signin](https://earthrelay-production.up.railway.app/staff/signin) |
+| **Volunteer** | Join / sign in; accept field tasks (map pin + street address, not citizen phone/name) | [https://earthrelay-production.up.railway.app/community](https://earthrelay-production.up.railway.app/community) |
 
 On a **fresh deploy**, the organization desk opens with **Create organization login** (username, password, recovery email). Operators set their own credentials; secrets are not stored in this repository.
 
@@ -84,16 +84,14 @@ docker build -t earthrelay .
 docker run -p 8000:8000 earthrelay
 ```
 
-Deploy on **Railway** from this GitHub repo. Official demo:
+Deploy on **Railway** from this GitHub repo. Official demo entry points:
 
-**https://earthrelay-production.up.railway.app**
-
-| Role | Path |
+| Role | Live link |
 |---|---|
-| Citizen | `/` |
-| Volunteer | `/community` |
-| Organization | `/app/signin` |
-| Staff | `/staff/signin` |
+| Citizen | [https://earthrelay-production.up.railway.app/](https://earthrelay-production.up.railway.app/) |
+| Volunteer | [https://earthrelay-production.up.railway.app/community](https://earthrelay-production.up.railway.app/community) |
+| Organization | [https://earthrelay-production.up.railway.app/app/signin](https://earthrelay-production.up.railway.app/app/signin) |
+| Staff | [https://earthrelay-production.up.railway.app/staff/signin](https://earthrelay-production.up.railway.app/staff/signin) |
 
 Optional env vars (Railway Variables): SMTP for invite/reset email, `VITE_MAPBOX_TOKEN`, Gemini keys, etc. Without Mapbox, OpenFreeMap is used.
 
@@ -113,7 +111,7 @@ See [backend/README.md](backend/README.md) and [frontend/README.md](frontend/REA
 
 | Requirement | Where it is |
 |---|---|
-| Working demo | https://earthrelay-production.up.railway.app (or a screen recording) |
+| Working demo | Live app: https://earthrelay-production.up.railway.app — and a screen recording (provided with this submission) |
 | Public source repo | This GitHub repository |
 | Written description | This README |
 | Attribution | [ATTRIBUTION.md](ATTRIBUTION.md) |
